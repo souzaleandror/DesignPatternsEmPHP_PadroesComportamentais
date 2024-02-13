@@ -165,3 +165,164 @@ Estruturais
 Criacionais
 Como diminuir a complexidade do nosso código, trocando múltiplas condicionais por classes
 Esta técnica é chamada de Strategy, que é um dos padrões de projeto
+
+#### 13/02/2024
+
+@02-Chain of Responsibility
+
+@@01
+Projeto da aula anterior
+
+Caso queira, você pode baixar aqui o projeto do curso no ponto em que paramos na aula anterior.
+
+@@02
+Criando a calculadora de descontos
+
+[00:00] Bem-vindos de volta a mais um capítulo desse treinamento de padrões de projeto, onde estamos utilizando o php para aprender. Já temos uma calculadora de impostos, já aprendemos o padrão de projetos strategy. Agora vamos criar uma calculadora de descontos.
+[00:16] Vou criar uma nova classe CalculadoraDeDescontos. Temos nossa calculadora. O que ela faz? calculaDescontos para algum orçamento e devolve esse valor dos descontos.
+
+[00:35] Já temos nosso método definido. Só que como ela calcula esse desconto? Tem uma regra na nossa loja que diz que se um orçamento tiver mais de cinco itens, ou seja, mais de cinco produtos naquele orçamento, o cliente ganha 10% de desconto. Só que hoje nosso orçamento não tem a quantidade de itens, então vamos adicionar, ‘public int $quantidadeItens’.
+
+[01:00] Agora temos a quantidade de itens. Nossa calculadora de desconto vai verificar, ‘if $orcamento->quantidadedeItens > 5’, ela vai devolver ‘return $orcamento->valor * 0.1’. Ou seja, 10% do valor do orçamento.
+
+[01:22] Agora, se não tiver mais do que cinco, se tiver cinco itens ou menos, não tem desconto. Aqui já temos uma implementação da calculadora de descontos, vamos fazer nossos testes. Vou comentar tudo que temos, só para o arquivo ter uma espécie de histórico, e vamos criar uma $calculadora = new \Alura\DesignPattern\CalculadoraDe Descontos’.
+
+[01:50] Nossa calculadora vai calcular os descontos para algum orçamento, só que qual é esse orçamento? Vamos criar. Tenho ‘$orcamento = new Orçamento()’, e esse orçamento vai ter o valor de 200 reais, e esse orçamento tem sete itens. vamos ter um desconto de 10%. Se eu exibir isso, meu programa tem que exibir 20, 10% de 200.
+
+[02:22] Vamos executar. Perfeito. Agora, se eu mudar a quantidade de itens de sete para cinco, o desconto tem que ser zero, porque se não tenho mais de cinco itens não tenho desconto. Vou executar, e zero. Tudo funcionando perfeito. Só que obviamente as coisas mudam. A única constante no mundo da computação é a mudança.
+
+[02:45] Então, surgiu uma requisição de uma nova feature, uma nova implementação, um pedido, para que implementemos uma nova regra de desconto. Vamos discutir essa nova regra no próximo vídeo.
+
+@@04
+Muitos ifs
+
+Em diversas ocasiões, o instrutor cita que ter diversos ifs pode ser um problema, e que ter uma classe que "pode crescer para sempre" também é um problema.
+Qual o problema real deste cenário, onde uma classe tem muitos ifs ou pode crescer para sempre?
+
+Vários ifs deixam o código lento, podendo consumir mais recursos do que é necessário e quebrar toda a minha aplicação por isso
+ 
+Alternativa errada! O simples fato de ter vários ifs não deixa uma aplicação lenta.
+Alternativa correta
+Se uma classe pode crescer para sempre, ela vai acabar ocupando muito espaço no meu HD e quebrar toda a minha aplicação por isso
+ 
+Alternativa correta
+Se eu precisar editar um pedaço de código, para implementar uma nova funcionalidade, as chances de quebrar funcionalidades existentes é grande
+ 
+Alternativa correta! Sempre que uma nova funcionalidade dever ser implementada, o ideal é que possamos criar código novo e editar o mínimo possível de código já existente. Este é um dos principais pontos do princípio Aberto-Fechado (Open-Closed Principle) do SOLID. Ao editar código existente, podemos acabar quebrando funcionalidades já implementadas e funcionais.
+
+@@05
+Strategy resolve
+
+[00:00] Bem-vindos de volta. Quis fazer esse vídeo separado para batermos um papo, conversarmos sobre como resolver esse problema. E já conhecemos uma solução para remover vários ifs de algum método, que é o padrão strategy, mas pense nesse processo, em como isso está sendo feito, e veja se conseguimos aplicar o strategy.
+[00:20] Vou fechar esse monte de coisa. Repare que na calculadora de impostos, eu recebo, a calculadora já sabe qual imposto ela precisa calcular. Ela recebe como parâmetro uma informação e a partir dessa informação ela faz o cálculo em outro parâmetro.
+
+[00:40] Agora, nossa calculadora de descontos precisa a partir do orçamento, a partir do único valor que ela recebe, decidir qual o desconto aplicado. Se fôssemos aplicar o padrão strategy, eu teria que receber, por exemplo, um desconto, e ao invés de fazer isso tudo simplesmente retornaria desconto, calculaDesconto do orçamento.
+
+[01:05] Só que para eu poder passar o desconto para essa calculadora eu teria que fazer esse monte de if, porque teria que verificar o valor do orçamento e a quantidade de itens no orçamento. Ou seja, estaria tirando dessa classe esse monte de if, mas ia ter que colocar em algum outro lugar. Talvez no nosso arquivo de testes. Em algum lugar precisaria colocar esse monte de if.
+
+[01:26] Por isso o padrão strategy não resolve esse problema, porque ele depende de que a classe que vai utilizar saiba qual a estratégia a ser implementada. Quando calculei o imposto eu sabia qual era a estratégia de cálculo de imposto, porque eu sabia qual imposto queria calcular.
+
+[01:44] No caso de descontos, não conheço a estratégia do cálculo. A estratégia do cálculo, a responsabilidade de calcular o desconto, precisa ser passada e calculada, decidida, durante a execução da calculadora de descontos.
+
+[02:00] Precisamos chegar de alguma forma numa solução que aplique toda essa cadeia de descontos pensando que primeiro tenta aplicar esse desconto, mas esse desconto não se aplica essa regra, então vê se se aplica a essa regra aqui. Não se aplica, então aplica desconto nenhum.
+
+[02:15] Precisamos criar essa cadeia de descontos de alguma outra forma, de uma forma que eu chame uma vez só, só que tenha todos os descontos já ligados um ao outro. Existem todos esses descontos aqui, calculadora, alguém tem que descobrir qual desconto vai ser aplicado.
+
+[02:38] Parece complexo, mas vamos ver no próximo vídeo que não é tão difícil assim de implementar.
+
+@@06
+Criando a Chain of Responsibility
+
+[00:00] Sejam bem-vindos de volta. Vamos agora neste vídeo implementar uma solução para este problema que estamos tendo. Pensando numa solução parecida com a de impostos, já que o problema é parecido, podemos criar uma classe para cada uma das regras de desconto e vamos partir dessa solução.
+[00:20] Vou criar uma nova classe para desconto, DescontoMaisDe5Itens, vai estar na pasta descontos, vou criar essa pasta. Criei a classe. Ela vai calcular o desconto, então ‘public function calculaDesconto(Orcamento $orcamento): float’. Só que existe aquela condição, ‘if ($orcamento->quantidadeItens > 5), ela calcula ‘return $orcamento>valor * 0.1’.
+
+[01:00] Agora, se não, o que ela vai fazer? Por enquanto é retornar zero, ou seja, sem desconto nenhum. Vamos fazer a mesma coisa para desconto por mais de 500 reais, DescontoMaisDe500Reais. Vou copiar esse método e colar aqui, para alterarmos o que precisamos alterar.
+
+[01:26] Se o valor for maior do que 500, digo que o desconto é de 5%. Criamos nossas duas classes e podemos verificar de outra forma agora. Primeiro tento aplicar desconto5Itens, DescontoMaisDe5Itens. E aí calculo o desconto desse orçamento utilizando esse desconto.
+
+[02:03] Agora, se o desconto for zero, ou seja, se o desconto for de zero, ou seja, ele não aplicou, vamos tentar aplicar um desconto de orçamento acima de 500 reais. Vou criar um novo desconto e vou tentar aplicar esse desconto aqui.
+
+[02:28] Agora, se continuar sendo zero, retorno um novo desconto, mas que no nosso caso é zero mesmo. Tenho o valor do desconto. Se for zero ele tenta aplicar o desconto iniciando, tem um desconto acima de cinco itens. Calculo esse desconto. Se for zero, ou seja, não teve desconto para esse orçamento, então tento aplicar um desconto daquela regra de mais de 500 reais.
+
+[03:02] Agora começamos a resolver, já está um pouco melhor, na minha opinião, só que e se eu tiver um novo desconto. Ou seja, o desconto continua sendo de zero reais, preciso criar uma nova classe, crio a nova classe, calculo desconto, verifico se é zero. Depois a próxima classe. E vou fazendo isso.
+
+[03:28] Essa nossa classe calculadora de descontos vai continuar crescendo infinitamente. Sempre que eu tiver uma nova regra de desconto vou ter que modificar. Ainda não está boa essa implementação.
+
+[03:40] Vamos pensar de outra forma então. No nosso desconto de cinco itens, o que quero fazer na verdade não é retornar zero. Tenho minha regra de calcular desconto. Se essa condição não for atendida, ou seja, se não posso aplicar esse desconto, tenta aplicar o próximo desconto dessa cadeia de descontos que comentamos, e aí ele vai tentar chamar esse desconto de mais de 500 reais. Se ele não atingir essa regra, se não puder calcular, ele chama o próximo desconto.
+
+[04:20] Com isso já começamos a pensar numa regra. Vamos criar essa regra. Vou ter uma classe base que vai representar todos os descontos, e essa classe que vai representar todos os descontos vai receber um desconto para ser o próximo e vai verificar. Atinge a condição? Se sim, calculo o desconto, senão tento o próximo.
+
+[04:45] Vou criar uma nova classe chamada Desconto. Só que ela vai ser uma classe abstrata, ou seja, não posso criar um desconto qualquer, preciso criar um dos descontos que vão estender essa classe de desconto.
+
+[05:05] Vamos pensar, vamos criar a regra geral de qualquer desconto. Primeiro, qualquer desconto precisa calcular o desconto. Tenho o calculaDesconto, que recebe um orçamento e devolve o valor desse desconto. Tenho a regra que todo desconto precisa ter.
+
+[05:28] Só que todo desconto agora vai receber o próximo desconto da cadeia. Criei um desconto de mais de cinco itens, qual o próximo da cadeia? Vamos criar um construtor, que recebe um desconto, que vai ser o próximo desconto. Vou inicializar isso. Criei o próximo desconto.
+
+[05:50] Agora o cálculo vai funcionar assim. O calculaDesconto atinge alguma característica, alguma condição? Se sim, ele vai fazer o cálculo. Senão vai chamar o próximo desconto. Como podemos fazer isso? Vou vir no mais de cinco itens e quantidadeItens é maior do que cinco? Então calculo o desconto. Senão vou no próximo desconto. Lembre que se está privado nossas classes filhas não conseguem acessar, está protegido.
+
+[06:32] O nosso próximo desconto vai tentar calcular esse desconto do orçamento. Qual o próximo desconto? No nosso caso vai ser o de 500 reais. E aqui sempre podemos ter um próximo. Ele tem que estender de um desconto. Vou pegar o próximo desconto e vou calcular o desconto desse orçamento.
+
+[06:55] Aqui temos uma cadeia. Repare que sempre que eu criar um novo desconto ele vai herdar de desconto e verifica se atinge alguma condição, calcula, mas se não atingir essa condição ele tenta o próximo desconto dessa cadeia. Então nossa calculadora de descontos agora que coloquei o extends errado, não era para estar aqui, vai criar uma cadeia de descontos, que vai ser primeiro tentar executar esse desconto de mais de cinco itens. Só que se esse desconto de mais de cinco itens não funcionar, se não atingir as condições dele, vai tentar o desconto de mais de 500 reais.
+
+[07:48] Só que agora temos um problema. Já temos uma cadeia de descontos, então eu conseguiria aplicar nessa cadeia de descontos o cálculo de descontos, só que qual o próximo desconto para o desconto para mais de 500 reais? Porque neste momento só temos dois, e mesmo se tivéssemos três regras, quatro regras, cinco regras, em algum momento elas acabam, não são regras infinitas.
+
+[08:10] Aqui o que faríamos? Passaríamos null, alguma coisa assim? Podemos criar uma regra sem desconto. Posso criar um novo tipo de desconto que vai informar que não tem desconto, que é o final dessa cadeia. Se nenhuma das regras se aplicar, não tenho desconto nenhum.
+
+[08:30] Vamos implementar. Independente do valor do orçamento, essa regra retorna zero. Agora nossa calculadora de descontos pode criar o SemDesconto. Esse SemDesconto, para conseguir respeitar a regra do desconto vai sobrescrever o construtor. Ele sobrescreve construtor e não recebe nada.
+
+[09:02] Agora nosso construtor não recebe nada, só que se você reparar ele está informando um erro, porque precisa chamar o construtor do pai, certo? O construtor da classe base. Como fazemos nesse caso? Chamo o construtor passando o quê? Vou fazer com que o construtor da classe base possa receber um desconto ou nulo. Vou passar nulo.
+
+[09:30] Agora, caso não tenha um próximo desconto, ele não vai fazer nada. Só que não tem regra para chamar próximo desconto, então isso não vai dar erro. O que precisamos fazer agora? Já passamos o SemDesconto, ele não recebe nada no construtor. Perfeito, tudo funcionando. Vamos testar.
+
+[09:52] Vamos no nosso arquivo de testes garantir que tudo continua funcionando, que não quebramos nada, porque editei bastante código. Tem um errinho, os próximos descontos na minha classe desconto precisam ser do mesmo tipo, ou seja, pode ser nulo.
+
+[10:12] Voltando para os testes, aparentemente tudo certo. Se eu mudar a quantidade de itens para só cinco, o desconto vai mudar para 30%, e beleza. Implementamos um padrão. No próximo vídeo vou explicar um pouco melhor sobre esse padrão, porque esse vídeo ficou longo, ficou um pouco maçante, vou explicar a lógica por trás dele para entendermos melhor o que fizemos aqui.
+
+@@07
+Explicando o padrão
+
+[00:00] Bem-vindos de volta. Vamos recapitular, vamos ver o que fizemos, aquela bagunça que fizemos no último vídeo, entender tudo que aconteceu. Nossa calculadora de descontos agora faz o quê? Ela tenta executar, fazer o cálculo para o desconto onde tem mais de cinco itens no nosso orçamento. Se por algum motivo não funcionar o próximo desconto é o que tem mais de 500 reais no orçamento. Ou se nenhum desses for aplicado, sem desconto, ou seja, esse orçamento não vai receber desconto nenhum.
+[00:30] Dessa cadeia de descontos que a calculadora montou ela tenta calcular o desconto para esse orçamento. O que fizemos, essa cadeia, você pode imaginar como quando você liga para um atendimento de telemarketing, algum atendimento quando você precisa de suporte.
+
+[00:45] Sua internet parou de funcionar. Você liga. O primeiro item da cadeia é um robozinho falando “pressione 1 se você precisa de atendimento técnico”. Esse robozinho não vai conseguir resolver seu problema, então ele passa para o próximo elo dessa cadeia, dessa corrente.
+
+[01:03] Nesse próximo elo vai ter um atendente que não tem tanto conhecimento de redes, esse tipo de coisa, mas vai falar “tenta reiniciar seu roteador, vou reiniciar o sistema”. Se isso não funcionar, se ele não conseguir resolver seu problema, ele passa para o próximo elo dessa cadeia, dessa corrente, e uma pessoa mais técnica vai falar que talvez você precise atualizar o sistema do seu modem, talvez um técnico precise ir para sua casa.
+
+[01:32] Existe uma cadeia de responsabilidades até chegar em alguém que consiga resolver seu problema. E foi exatamente isso que implementamos aqui. Cadeia de responsabilidades, chain of responsibility é exatamente o nome desse padrão que implementamos. Definimos uma cadeia, uma corrente de responsabilidades, onde tento aplicar uma regra. Caso não consiga por algum motivo, não atenda aos requisitos, ou não funcione essa regra, tento aplicar a próxima, e tento aplicar a próxima, até que alguém consiga atender esse pedido.
+
+[02:02] Como implementamos isso? Existe mais de uma forma de implementar, como qualquer outro padrão. Como eu, Vinicius, escolhi implementar? Criei uma classe base de desconto, que vai representar o início dessa cadeia. E todas as classes que implementarem, que estenderem essa classe abstrata, vão ter um construtor que precisa passar o próximo desconto.
+
+[02:28] Ou seja, sempre vai ter um próximo. Isso criou um problema que quando queremos encerrar a cadeia, como por exemplo não passando desconto nenhum, precisei criar uma nova classe, que passasse como nulo o próximo desconto.
+
+[02:41] Existem outras formas de implementar, como por exemplo, ao invés de passar um construtor, ter um setProximo, ou defineProximoDesconto, e aí ao invés de passar no construtor criaria cada um dos descontos e chamaria o método defineProximoDesconto.
+
+[03:00] Existe mais de uma forma. Optei por implementar assim. Mas deixo o desafio para que você implemente sem utilizar o construtor, mas utilizando setProximo, e caso não tenha um próximo desconto, você precisa verificar, por exemplo, se o próximo desconto não existir retorna zero, algo desse tipo.
+
+[03:20] Mais uma vez. O que implementamos foi uma cadeia de responsabilidades onde alguém dessa cadeia vai precisar resolver nosso problema de aplicar desconto. Inclusive, isso pode ser até a regra de que não aplica desconto nenhum. Existe essa forma de implementar, onde definimos explicitamente o final de cadeia. Existe uma forma onde não passaria pelo construtor, definiria por um método, e se não quero ter um próximo só não chamo esse método. Tem várias formas de implementar, mas o conceito é basicamente esse.
+
+[03:50] Muito parecido com o telemarketing, ou uma linha de produção. Você recebe um item que você quer montar, só que esse item já passou pela parte que você faz, então você entrega para a próxima pessoa montar. E assim funciona uma linha de produção também. Esse é o padrão chain of responsibility.
+
+[04:06] Existem vários outros padrões, inclusive no próximo capítulo vamos implementar uma nova funcionalidade de impostos um pouco mais complexos, e o padrão que vamos aprender poderia até nos ajudar aqui. Mas vamos conversar sobre isso no próximo capítulo.
+
+@@08
+Para saber mais: Chain of Responsibility
+
+Assim como qualquer outro conceito em computação, existe mais de uma forma de implementar o padrão de projeto Chain of Responsibility.
+Para saber mais sobre a parte teórica deste padrão, e analisar diferentes implementações, você pode conferir este link: https://refactoring.guru/design-patterns/chain-of-responsibility.
+
+[Title](https://refactoring.guru/design-patterns/chain-of-responsibility)
+
+@@09
+Faça como eu fiz
+
+Chegou a hora de você seguir todos os passos realizados por mim durante esta aula. Caso já tenha feito, excelente. Se ainda não, é importante que você execute o que foi visto nos vídeos para poder continuar com a próxima aula.
+
+Continue com os seus estudos, e se houver dúvidas, não hesite em recorrer ao nosso fórum!
+
+@@10
+O que aprendemos?
+
+Nesta aula, aprendemos:
+A diferenciar casos onde padrões semelhantes podem ser aplicados
+Como criar uma cadeia de possíveis algoritmos como Chain of Responsibility
+A utilizar o padrão para aplicar um desconto dentro de uma cadeia de possíveis descontos
