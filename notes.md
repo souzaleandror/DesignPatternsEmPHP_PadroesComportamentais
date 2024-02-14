@@ -326,3 +326,135 @@ Nesta aula, aprendemos:
 A diferenciar casos onde padrões semelhantes podem ser aplicados
 Como criar uma cadeia de possíveis algoritmos como Chain of Responsibility
 A utilizar o padrão para aplicar um desconto dentro de uma cadeia de possíveis descontos
+
+##### 14/02/2024
+
+@03-Template Method
+
+@@01
+Projeto da aula anterior
+PRÓXIMA ATIVIDADE
+
+Caso queira, você pode baixar aqui o projeto do curso no ponto em que paramos na aula anterior.
+
+[Title](https://caelum-online-public.s3.amazonaws.com/1668-php-design-pattern-comportamental/02/php-design-pattern-projeto-completo-aula-2.zip)
+
+@@02
+Cálculos condicionais de impostos
+
+[00:00] Sejam muito bem-vindos de volta a mais um capítulo deste treinamento de padrões de projeto utilizando php. Já aprendemos bastante coisa, aprendemos sobre o padrão strategy, o padrão chain of responsibility, e agora vamos falar sobre outro padrão. Só que antes preciso criar novos impostos. Chegou a demanda, porque nossa calculadora precisa ser capaz de entender dois novos impostos. E eu não conheço mais nenhum imposto de cabeça, então vou passar a criar nomes de impostos, espero que você não se importe.
+[00:35] Vou criar o ICPP. O ICPP é um pouco mais complexo que os outros, porque ele tem duas alíquotas. Se o produto for mais caro do que 500 reais, ele incide sobre 3% do valor do orçamento, se for 500 reais ou menos são 2%. Acabei de criar essa regra, mas finge que chegou junto com a demanda.
+
+[01:03] Se é um novo imposto, ele precisa implementar a interface de imposto. Se precisa implementar essa interface precisa ter o método CalculaImposto. Até aqui nada novo. Vamos criar nossa regra, ‘if ($orcamento->valor > 500)’, e já esqueci qual foi a regra que falei especificamente, então se for acima de 500 reais vai ser de 3%. Então, orçamento valor vezes 0.03. Só 3% de imposto.
+
+[01:33] Agora, se for 500 reais ou menos 2% de imposto. Orçamento valor 0.02. Se passar de um limite aplica a alíquota máxima de imposto. Senão aplica a alíquota mínima. Agora precisamos implementar o segundo imposto, que é o IKCV, ótimo nome de imposto, parece um imposto da Ucrânia.
+
+[02:03] Vamos implementar esse imposto. Mesma regra, só que ele tem algumas regras diferentes. É bem parecido. Se o valor total do orçamento for maior do que 300 reais e se esse orçamento tiver mais do que três itens, ele aplica a alíquota máxima, que é de 4%. Caso contrário aplica alíquota mínima, que é de 2,5%.
+
+[02:50] Aqui temos duas novas regras, dois novos impostos com regras diferentes. Verificamos uma condição. Se eu preciso aplicar alíquota máxima ele aplica a alíquota máxima desse imposto, senão aplica a alíquota mínima. Temos duas alíquotas nesses impostos, e repare que até trocando de tela parece muito, é muito semelhante um com o outro. Temos uma lógica parecida, um modelo, um template de algoritmo muito semelhante, só que esse código está duplicado.
+
+[03:28] No nosso caso tem um template pequeno, mas para várias classes esse exemplo pode ficar um pouco mais chato, se essa condição acabar ficando maior vamos ter que alterar o código e alterar coisas maiores. Enfim, duplicar código nunca é legal, então como será que podemos resolver isso? Vamos pensar no próximo vídeo uma forma de começar a refatorar.
+
+@@03
+Problema atual
+PRÓXIMA ATIVIDADE
+
+No último vídeo, criamos dois novos impostos, que possuem regras muito semelhantes: há duas alíquotas possíveis para cada um.
+Qual o problema com o código até este ponto?
+
+O algoritmo para o cálculo de impostos deste tipo está duplicado
+ 
+Alternativa correta! A verificação por uma alíquota máxima e o retorno condicional da alíquota está duplicada em duas classes. Mesmo em um exemplo pequeno, como este, duplicação nunca é legal. Mas imagine um algoritmo grande. O ideal é sempre extrair códigos duplicados.
+Alternativa correta
+Os cálculos de impostos estão muito complexos
+ 
+Alternativa correta
+Um imposto não pode ter mais de uma alíquota
+
+@@04
+Extraindo a lógica para métodos privados
+
+[00:00] Sejam muito bem-vindos de volta, e vamos começar a refatorar esse código nesse vídeo. Existem algumas partes desse algoritmo para serem executadas. Primeiro é verificar se deve aplicar a taxação máxima. Caso sim, calcular a taxação máxima, ou caso contrário calcular a taxação mínima. Vamos criar essas partes que são específicas de cada um dos impostos em métodos privados.
+[00:35] Eu vou selecionar isso. Como estou utilizando php storm vou utilizar uma função dele que é só apertar "Ctrl + Alt + M”. Ou vou em extrair para método. O que vamos verificar é que deve aplicar taxa máxima. Estamos vendo se ele deve aplicar a taxa máxima ou não.
+
+[01:08] Refatorei, e agora ele está verificando se deve aplicar a taxa máxima, se sim ele está aplicando a taxa máxima. Então vamos extrair isso também. Vou clicar com botão direito, refatorar, extrair para um método. Aqui é calculaTaxaMaxima, ele está realizando o cálculo. Caso contrário vai calcular a taxa mínima. Refatorar, extrair para um método, calculaTaxaMinima.
+
+[01:53] Se você não estiver usando php storm é só criar um novo método e passar o conteúdo dele para lá. Repare que esse pedaço é comum tanto para o ICPP quanto para o IKCV. Temos um cálculo de imposto que verifica se deve aplicar a taxação máxima, se sim calcula essa taxa máxima, senão calcula a taxa mínima.
+
+[02:20] Com isso criamos uma forma de pegar tudo que é incomum dentre esses impostos, que tem duas alíquotas de taxação e extraímos o que é específico. Primeiro, podemos simplesmente copiar isso para o ICPP e implementar as partes específicas mudando os números, só que vou ter tudo isso repetido nas duas classes? Não faz sentido.
+
+[02:47] Então, o que vou fazer é extrair, e aí não sei se o php storm me ajuda com isso, para uma nova classe. Vou criar uma nova classe, que vai ser impostoCom2Aliquotas.
+
+[03:06] Todos os impostos que eu vier a criar que tem duas alíquotas vão seguir esse mesmo molde, só que isso obviamente é uma classe abstrata, porque não posso simplesmente criar um imposto com duas alíquotas sem ser um imposto específico, mas ele vai ter essa implementação do cálculo do imposto. E aí obviamente precisa implementar a interface de imposto.
+
+[03:33] Só que além de implementar essa interface, ele precisa ter esses três métodos, então vou criar como métodos abstratos, ‘abstract public function deveAplicarTaxaMacima(Orcamento $orcamento): bool”. Vou copiar, “Ctrl + D” para duplicar a linha, vou copiar esses métodos, esses dois retornam, “Alt + J” para selecionar mais de um item, float.
+
+[04:06] Agora repara que tenho todo o template para um novo imposto que tenha duas alíquotas. Então tudo que nossos impostos vão precisar agora é implementar a parte específica. A regra, se deve aplicar taxa máxima ou não, e o cálculo de cada uma das regras. Agora não preciso mais criar todo o algoritmo em cada uma das classes, porque pode ser muito tranquilo vir aqui e esquecer um return, cometer esse tipo de bobeira que às vezes leva tempo para encontrarmos.
+
+[04:35] Então sempre que pudermos evitar duplicação repetição de código, é muito importante, é o ideal. Vamos aplicar isso. Vou estender o imposto com duas alíquotas, e não preciso implementar isso mais, só os métodos específicos.
+
+[04:52] Aqui o que acontece? Esses métodos estão sendo definidos como públicos, então obviamente não podemos defini-los como privados. Eu poderia colocar protected, que prefiro colocar para todos.
+
+[05:10] Agora tenho todas as regras específicas implementadas na minha classe, e o que é genérico para qualquer imposto com duas alíquotas está numa classe separada. Vou no ICPP fazer a mesma coisa. Preciso implementar três métodos. O deveAplicarTaxaMaxima é essa parte ‘return $orcamento ->valor > 500’, se o orçamento for maior do que 500 reais ele deve aplicar. E a taxa máxima é de 3%, enquanto a mínima é de 2%. Repare que só implementei as partes específicas e o genérico posso apagar.
+
+[06:00] Recapitulando, tenho agora um template de um método, para um imposto com duas alíquotas que vai chamar só as partes específicas, que só precisa que sejam implementadas nas classes específicas as regras específicas. E esse padrão de extrair classes com template de um algoritmo, e esse algoritmo se chamar métodos específicos na classe filha é chamado de template method. Esse padrão é muito comum, muito importante e muito prática para que evitemos duplicação de código, uma duplicação de um algoritmo que seja utilizado em várias classes.
+
+[06:35] Aqui vimos um exemplo claro e no próximo vídeo vamos discutir sobre como poderíamos ter utilizado no nosso último capítulo sobre desconto com a cadeia de responsabilidade.
+
+@@05
+Modificadores de acesso
+PRÓXIMA ATIVIDADE
+
+Durante a aplicação do padrão Template Method, foi utilizado o modificador de acesso protected para os métodos que seriam sobrescritos pelas classes específicas.
+Por que não utilizar public ou private?
+
+Não utilizamos public, pois assim os métodos não seriam acessíveis pelas classes filhas e não usamos private porque deixaria os métodos disponíveis para todos acessarem, o que quebraria o encapsulamento das regras
+ 
+Alternativa correta
+Não utilizamos private, pois assim os métodos não seriam acessíveis pelas classes filhas e não usamos public porque deixaria os métodos disponíveis para todos acessarem, o que quebraria o encapsulamento das regras
+ 
+Alternativa correta! Se nós utilizássemos private, nenhuma das classes filhas iriam implementar o método da classe base. Não existem métodos abstratos privados. Já se deixássemos como public, os métodos que deveriam ser apenas utilizados dentro da classe estariam acessíveis de qualquer lugar, fornecendo um acesso desnecessário às regras do sistema.
+Alternativa correta
+Não faria nenhuma diferença entre usar public e protected, já private geraria um erro
+
+@@06
+Falando sobre o padrão
+
+[00:00] Bem-vindos de volta. Vamos falar um pouco sobre o template method, que esse padrão de projetos que acabamos de aprender, que é bem importante. Poderíamos facilmente ter aplicado aqui de várias formas, como por exemplo se eu criasse um método calcula, que vai ser o template do nosso algoritmo, recebendo orçamento, e ele poderia verificar se o calculaDesconto desse orçamento retornou zero, então vou chamar o próximo desconto, esse próximo desconto calcula o orçamento, senão ele retornaria o valor desse cálculo. Algo do tipo. Se for zero, senão retorna ele.
+[00:55] Essa é uma implementação que daria para melhorar, mas é um exemplo rápido de como poderíamos fazer isso. Aí em nossos descontos eu chamaria o método calcula, esse método tentaria realizar o método calculaDesconto que cada um dos descontos implementou, e se ele devolvesse zero eu ia dizer para tentar no próximo desconto. Teríamos uma espécie de mistura do template method com o chain of responsibility. Seria bem interessante, mas vou tirar porque não precisamos disso agora. E vamos falar sobre o template method.
+
+[01:30] Uma analogia com o mundo real, sem pensar em código, o template method seria como fazemos para construir uma casa, por exemplo. Para construir uma casa, acredite ou não eu sei como constrói uma casa, existe todo um passo a passo que você precisa seguir. Você precisa fazer fundação da casa, levantar as paredes, esse tipo de coisa. Todo o processo que você precisa fazer. Só que cada casa é uma casa. Você precisa implementar as partes específicas.
+
+[02:00] Por exemplo, no passo de pintar a parede cada pessoa vai pintar a parede de um jeito. No passo de construir a sala, a arquitetura da sala de cada pessoa vai ser de um jeito. Existe um template, um modelo padrão, e você implementa as partes específicas nas classes filhas, esse modelo padrão fica numa classe base, normalmente abstrata.
+
+[02:16] Um exemplo que também poderíamos tentar dar já pensando em código seria se eu tivesse um blog e quero cada vez que publicar nesse blog também publicar numa página das redes sociais. Então para publicar numa rede social sei que preciso receber as credenciais, tentar fazer login. Caso não consiga fazer login gera um erro, um log na aplicação. Caso consiga fazer login, envia o dado desse post e depois faz logout.
+
+[02:44] Então, eu criaria uma classe base com todo esse template, todo esse modelo genérico, e poderia criar classes específicas, para por exemplo, Facebook, Twitter, Instagram. Você poderia criar classes específicas para cada uma das redes sociais. Esse é o conceito do template method. Você tem um algoritmo, o template desse algoritmo, a base desse algoritmo, implementado numa classe base, mas nas classes filhas, nas classes que vão estender a classe base você implementa as partes específicas. Isso é o template method e é um padrão muito utilizado, bastante importante, bastante poderoso.
+
+[03:25] Agora vamos voltar a falar sobre nosso orçamento, que ainda está muito pobre. Ainda vamos adicionar mais regras sobre ele, ele vai ter estados, e vamos conversar bastante sobre isso no próximo capítulo.
+
+@@07
+Para saber mais: Template Method
+PRÓXIMA ATIVIDADE
+
+As aplicações do padrão Template Method no mundo PHP são muitas, mas além de entender a parte prática, é muito importante ler sobre a teoria por trás do padrão.
+Para entendê-lo melhor, você pode conferir este link: https://refactoring.guru/design-patterns/template-method.
+
+@@08
+Faça como eu fiz
+PRÓXIMA ATIVIDADE
+
+Chegou a hora de você seguir todos os passos realizados por mim durante esta aula. Caso já tenha feito, excelente. Se ainda não, é importante que você execute o que foi visto nos vídeos para poder continuar com a próxima aula.
+
+Continue com os seus estudos, e se houver dúvidas, não hesite em recorrer ao nosso fórum!
+
+@@09
+O que aprendemos?
+PRÓXIMA ATIVIDADE
+
+Nesta aula:
+Reforçamos a ideia de que repetição de código é problemática
+Criamos um template de algoritmo que estava sendo replicado em mais de uma classe e utilizamos herança para reaproveitar esse código
+Aprendemos que a esta técnica foi dado o nome de Template Method
+Vimos que é possível aplicar mais de um padrão no mesmo código
+
