@@ -333,7 +333,6 @@ A utilizar o padrão para aplicar um desconto dentro de uma cadeia de possíveis
 
 @@01
 Projeto da aula anterior
-PRÓXIMA ATIVIDADE
 
 Caso queira, você pode baixar aqui o projeto do curso no ponto em que paramos na aula anterior.
 
@@ -357,7 +356,6 @@ Cálculos condicionais de impostos
 
 @@03
 Problema atual
-PRÓXIMA ATIVIDADE
 
 No último vídeo, criamos dois novos impostos, que possuem regras muito semelhantes: há duas alíquotas possíveis para cada um.
 Qual o problema com o código até este ponto?
@@ -403,7 +401,6 @@ Extraindo a lógica para métodos privados
 
 @@05
 Modificadores de acesso
-PRÓXIMA ATIVIDADE
 
 Durante a aplicação do padrão Template Method, foi utilizado o modificador de acesso protected para os métodos que seriam sobrescritos pelas classes específicas.
 Por que não utilizar public ou private?
@@ -435,14 +432,12 @@ Falando sobre o padrão
 
 @@07
 Para saber mais: Template Method
-PRÓXIMA ATIVIDADE
 
 As aplicações do padrão Template Method no mundo PHP são muitas, mas além de entender a parte prática, é muito importante ler sobre a teoria por trás do padrão.
 Para entendê-lo melhor, você pode conferir este link: https://refactoring.guru/design-patterns/template-method.
 
 @@08
 Faça como eu fiz
-PRÓXIMA ATIVIDADE
 
 Chegou a hora de você seguir todos os passos realizados por mim durante esta aula. Caso já tenha feito, excelente. Se ainda não, é importante que você execute o que foi visto nos vídeos para poder continuar com a próxima aula.
 
@@ -450,11 +445,153 @@ Continue com os seus estudos, e se houver dúvidas, não hesite em recorrer ao n
 
 @@09
 O que aprendemos?
-PRÓXIMA ATIVIDADE
 
 Nesta aula:
 Reforçamos a ideia de que repetição de código é problemática
 Criamos um template de algoritmo que estava sendo replicado em mais de uma classe e utilizamos herança para reaproveitar esse código
 Aprendemos que a esta técnica foi dado o nome de Template Method
 Vimos que é possível aplicar mais de um padrão no mesmo código
+
+#### 15/02/2024
+
+@04-Command
+
+@@01
+Projeto da aula anterior
+
+Caso queira, você pode baixar aqui o projeto do curso no ponto em que paramos na aula anterior.
+
+[Title](https://caelum-online-public.s3.amazonaws.com/1668-php-design-pattern-comportamental/04/php-design-pattern-projeto-completo-aula-4.zip)
+
+@@02
+Gerando um pedido
+
+[00:00] Bem-vindos de volta a mais um capítulo deste treinamento de padrões de projeto utilizando php. Agora surgiu uma nova demanda, bem simples, na verdade. Quando um orçamento passar para o status de aprovado, vamos ter que gerar um pedido. Normalmente, em um sistema real, nessa tarefa de gerar pedido receberíamos um id desse orçamento, pegaríamos os dados do orçamento, criaríamos esse pedido e com ele realizaríamos as tarefas necessárias.
+[00:32] No nosso caso, como não estamos utilizando banco de dados e esse tipo de coisa, vamos fazer um pouco diferente, mas a lógica vai ser de gerar pedido. Antes de fazer a lógica precisamos criar uma classe de pedido. Vamos botar a mão na massa, criar uma nova classe chamada Pedido, ela vai ter um cliente, obviamente. Só vou salvar o nome do cliente, um dateTime finalização, que vai ser um DateTimeInterface, e o orçamento em si.
+
+[01:15] Repare que como o php 7.4 foi lançado há pouco tempo, o php storm ainda não completa para nós quando estamos colocando tipo, isso é normal, nas próximas versões provavelmente vai ser otimizado.
+
+[01:35] Tenho uma classe de pedidos super simples. O que vou fazer agora é criar um comando da linha de comando que eu possa através do terminal gerar um novo pedido. Vou criar um novo arquivo chamado gera-pedido. Aqui o que vou fazer é, caso você não tenha feito nenhum dos treinamentos onde expliquei isso preste atenção que vai ser bem tranquilo.
+
+[01:55] Existe uma variável chamada argv do php que é preenchida automaticamente quando chamamos o php pela linha de comando. Ela contém todos os argumentos passados para o script. Vou acessar esse link.
+
+[02:14] Nesse array todos os valores que passarmos pela linha de comando vão chegar nela, sendo que o valor zero desenho array é o nome do script em si. Todos a partir do um são os parâmetros passados.
+
+[02:30] Eu vou pegar o valor do orçamento, que vai ser o primeiro parâmetro, argv1. Vou pegar o número de itens para o orçamento também, vai ser argv2, e o nome do cliente vai ser argv3. Peguei esses três dados, vou criar um orçamento, importo isso. Inclusive já vou importar nosso pedido também. O orçamento vai ter como quantidade de itens o número de itens, o orçamento vai ter como valor o valor orçamento, e agora vou criar um pedido. Esse pedido tem como data de finalização hoje, igual new DateTime, ou seja, hoje. Essa é a data de finalização do pedido.
+
+[03:35] O pedido tem como cliente o NomeCliente que pegamos. E o pedido tem como orçamento esse orçamento do pedido. Pronto. A partir do momento em que pegamos o pedido, fazemos o que precisamos fazer, como por exemplo, cria pedido no banco de dados, não vamos implementar isso agora, até porque já temos cursos de banco de dados aqui, envia e-mail para cliente, e realiza qualquer outra ação que precise realizar. Mas basicamente esse é o comando que vamos executar para gerar um pedido.
+
+[04:26] Vou partir para o terminal, vou chamar php gera-pedido e vou passar todos os parâmetros. O valor desse orçamento vai ser de 1.200,50 reais, o número de itens é de sete, e o nome do cliente é Vinicius Dias.
+
+[04:48] Teve um erro. Esqueci do autoloader, um pequeno detalhe muito importante. Agora sim, vamos executar de novo. Cria pedido no banco de dados, envia e-mail para o cliente, aparentemente tudo certo. Criamos um comando que pega vários dados e faz o que ele tem que fazer, regra de negócio. Pega o orçamento, cria um novo pedido utilizando esse orçamento, salva no banco, manda e-mail. Uma rotina normal, algo que um comando normalmente faz.
+
+[05:22] Só que agora eu te pergunto, e se eu precisar criar essa mesma ação em uma página na web? Se além de conseguir fazer isso pela linha de comando que vai estar na tarefa agendada do meu servidor, por exemplo, se eu quiser fazer isso por uma página da web? E se além de fazer isso por uma página da web eu também quisesse por isso numa API? Ou seja, em outra URL, outra forma. Será que preciso ficar copiando esse código?
+
+[05:48] Eu sei que na web os dados vão vir do formulário, não vão vir da linha de comando. Eu sei que numa API os dados vão vir em JSON e algo do tipo. Só que toda essa parte é igual. Então será que teria que ficar copiando e colando só passando essas partes por parâmetro? Não faz muito sentido ficar repetindo código. No próximo vídeo vamos conversar sobre como poderíamos separar isso em uma classe separada, um arquivo separado, alguma coisa.
+
+@@03
+Problemas com a abordagem
+
+O código criado até aqui é muito comumente encontrado em sistemas reais. A diferença é que, ao invés de estar em um arquivo rodado na CLI, está em algum Controller ou algo do tipo.
+Qual o problema de ter um código arquitetado assim, recebendo os dados e executando todas as tarefas no mesmo local?
+
+O código utiliza variáveis globais $argv, o que pode ser um grande problema
+ 
+Alternativa errada! $argv é uma variável especial do PHP e pode ser lida sem problemas relacionados a boas práticas.
+Alternativa correta
+Se fosse necessário executar o mesmo fluxo de outro lugar (web, API, filas), o código precisaria ser duplicado
+ 
+Alternativa correta! Da forma como o código foi organizado, se precisássemos, além de executar a geração de pedido através da CLI, também executar através de um formulário web, uma API, mensagens de uma fila, precisaríamos duplicar todo este código em vários lugares.
+Alternativa correta
+Temos um código feio por estar sendo executado na linha de comando
+ 
+Alternativa errada! A pergunta é sobre como o código é arquitetado, independente de onde ele estiver sendo executado.
+
+@@04
+Criando um Command
+
+[00:00] Bem-vindos de volta. Já vimos o problema com essa abordagem. Aqui temos um código muito simples, mas mesmo assim é um código bem próximo da realidade. É muito comum criarmos objetos e salvarmos esse objeto no banco, enviar algum dado por e-mail. É muito comum esse tipo de tarefa. E também é muito comum precisarmos expor a mesma tarefa para vários mecanismos de entrega. Para linha de comando, como fizemos, para web, através de um formulário, para uma API, para uma fila, para diversos mecanismos de entrega.
+[00:32] Então não é interessante executar a lógica direto no mecanismo de entrega, ou seja, em um comando da linha de comando, em um controller de uma página da web, um controller de uma API. Não é interessante fazer dessa forma.
+
+[00:46] Vamos separar esse comando em uma classe que represente ele. Vou criar uma nova classe na raiz mesmo, porque não estou separando as classes muito bem. Vou chamar de GerarPedido, porque é um comando, uma ação que estou executando.
+
+[01:08] Em GerarPedido tenho algumas dependências, preciso receber algumas coisas. Como por exemplo, preciso do valor do orçamento, do número de itens e do nome do cliente. Vou pegar int $numeroItens e string $nomeCliente.
+
+[01:33] Tenho um construtor, vou inicializar esses atributos. Tudo com os tipos definidos. Tenho os dados, a estrutura do comando. Agora o que quero fazer é executar esse comando. Ou seja, GerarPedido, você que é um comando, se execute. Quero executar você. Então vou executar esse comando. E nesse momento faço tudo isso.
+
+[02:14] Já tenho o número de itens, o valor do orçamento e o nome do cliente. Tenho todas as regras definidas em um comando. Posso criar esse GerarPedido, vou gerar esse comando passando os dados valor orçamento, número de itens e nome cliente.
+
+[02:47] Gerei o comando. Agora chamo o execute, faça o que você tem que fazer. Se eu executar esse mesmo comando php, nome do arquivo, o valor do orçamento, o número de itens, que é doze itens, e o cliente, que é Vinicius Dias.
+
+[03:35] Agora sim criou o pedido no meu banco de dados e enviou e-mail para o cliente. Ou seja, no meu mecanismo de entrega, que é a linha de comando, o meu comando não mudou. Continuo informando a mesma coisa, só que agora tenho todo o comando separado numa classe específica, numa classe separada. Inclusive, se eu tiver algum gerenciador de comandos, alguma coisa que lida com comandos, ainda posso gerar uma interface chamada de command, por exemplo, e dizer que ela precisa ter um ‘public funciona execute’. Todo comando precisa ter um método que se executa, e o gerar pedido é um comando.
+
+[04:20] Agora posso, por exemplo, ter um gerenciador de comandos, uma fila de comandos, onde nessa fila posso ter uma lista de vários comandos, e essa fila de comandos vai dizendo “agora gera o próximo, gera o próximo, executa o próximo”, com isso posso colocar uma fila de comandos, uma fila de processos para ser executada.
+
+[04:38] Mas será que é interessante deixar os dados desse comando, a possibilidade de representar o comando, e a possibilidade de executar o comando tudo na mesma classe? Vamos conversar sobre isso no próximo vídeo.
+
+@@05
+Command Handlers
+
+[00:00] Sejam muito bem-vindos de volta. Nesse vídeo queria trocar uma ideia com vocês bastante interessante. Não sei se você já ouviu falar, mas existe um conceito chamado DDD, que é Domain-Driven Design, ou seja, design ou arquitetura, modelagem, orientada ao domínio.
+[00:18] Nesse conceito existem várias coisas. Uma dessas arquiteturas que foram pensadas para se aplicar muito bem a esse modelo é a clean architecture, ou arquitetura limpa. E um outro modelo muito parecido, que é a arquitetura hexagonal. Se você não conhece nenhum desses termos, não se preocupe, não é pré-requisito para este curso, mas estou falando isso porque vale uma pesquisa.
+
+[00:40] Mas se você já ouviu falar sobre isso você provavelmente já ouviu falar sobre application service ou use cases. Isso é muito comum no mundo da web. E o que é, bem por alto? Um use case, ou um command, como fizemos aqui, é um caso que vai acontecer na sua aplicação, só que não importa por onde esse caso de uso, esse comando vai ser executado. Tanto faz de onde ele vai vir, mas é um comando que vai ser executado na sua aplicação, que vai fazer alguma coisa no seu domínio da aplicação.
+
+[01:10] Por exemplo, gerar pedido. Quando digo isso você sabe que é um caso de uso, um serviço que minha aplicação faz. No mundo da web, e isso obviamente casa muito bem com php, existe esse conceito de use cases ou application services, que vem do DDD, da arquitetura limpa. Enfim.
+
+[01:30] Com esse conceito, o design pattern que acabamos de implementar no último vídeo foi um pouco alterado. O que fizemos no último vídeo é chamado de padrão de projeto command, ou comando, que é a criação de uma classe, uma estrutura de classes, na verdade, que a partir de uma interface comum sabe como executar alguma tarefa, independente de onde essa tarefa venha.
+
+[01:55] Ela recebe os dados necessários para se executar e executa. Basicamente, isso é o padrão de projeto command. Só que com o advento da internet e várias outras modificações na forma de codificar, fizeram uma alteração muito interessante nesse padrão e vamos implementar essa alteração agora.
+
+[02:14] Temos, como mais uma vez vou falar, os dados de um comando, a representação de um comando, e a execução do comando, tudo na mesma classe. Normalmente isso faz sentido, porque a orientação a objetos é a junção dos dados com comportamento, só que nesse caso perdemos alguns poderes em questão de código mesmo.
+
+[02:36] Por exemplo, estou recebendo no construtor todos os dados que o use case precisa. Mas e se eu precisasse também de uma classe externa, de um repositório, de outro serviço, de um serviço para criar e-mail, por exemplo? Precisaria também receber no construtor, o que poluiria um pouco todo meu código, ou precisaria criar um setter que também poluiria meu código.
+
+[03:02] Além desse problema, alguns outros foram surgindo, por isso surgiu um novo padrão que não é tão novo, mas hoje é muito utilizado, de command handlers, ou os application services.
+
+[03:16] O que eu vou fazer aqui é o seguinte, tenho gerar pedido, que é um comando. Vou criar algo que execute esse comando. Vou chamar de GerarPedidoHandler. Esse nome não é o melhor do mundo, eu sei, mas é um padrão bastante comum, se você encontrar algo como GerarPedidoCommand e GerarPedidoHandler. Ou seja, a ação é dividida em duas. Entre a representação do comando em si e a execução do comando.
+
+[03:44] No handler eu poderia, por exemplo, no construtor, receber um repositório, PedidoRepository, um MailService para enviar e-mail, esse tipo de coisa. Inicializaria minha classe. E no execute, no run, ou qualquer coisa, faria, executaria, aquele comando GerarPedido, porque nesse comando, nessa classe viriam os dados necessários para executar esse comando, e essa classe em si teria as dependências para executar esse comando. Aqui poderíamos fazer algo desse tipo.
+
+[04:33] No GerarPedido eu teria os getters, vou adicionar. Tenho vários getters, ignore a nomenclatura, esse tipo de coisa, é só para chegarmos numa execução. Do comando GerarPedido eu pegaria o número de itens, que é um inteiro. Do comando GerarPedido pegaria o valor do orçamento. E do comando GerarPedido pegaria o nome do cliente. Assim eu executaria aqui, com o PedidoRepository executaria a criação do pedido do banco de dados. Com o MailService eu executaria o envio do e-mail para o cliente.
+
+[05:23] Aqui ganho em dois casos. Primeiro, ganho com o conceito de ter o comando separado para que eu execute ele independente da forma de por onde está vindo, por onde está sendo executado, ou seja, seja pela linha de comando, por um formulário web, por uma API que recebe um JSON, por uma aplicação que lê na mensageria. Independente de onde vem, o meu comando é representado da mesma forma e a ação dele é executada da mesma forma, sem duplicação de dados.
+
+[06:00] Dessa forma, separando os dois ganho um pouco mais de poder na injeção de dependência e algumas coisas desse tipo. Essa separação é bastante benéfica quando paramos para pensar na arquitetura, no código em si. Se pensarmos só nos conceitos é lindo ter um comando que tem seus dados e sabe executar. Só que quando colocamos no código esbarramos com alguns problemas, que esse padrão, criando os comandos e os handlers de forma separada podem ajudar bastante.
+
+[06:27] No meu GerarPedido o que eu faria é, depois de criar o comando GerarPedido criaria meu GerarPedidoHandler, e aqui passaria através de algum serviço de injeção de dependência como vimos no curso de MVC, todas as dependências para cá, e depois com esse handler eu executaria esse comando GerarPedido. E pronto, assim executo as tarefas.
+
+[07:05] Em todos os lugares que precisar só preciso disso. Todos os lugares que tiver que executar só preciso disso. Preciso do handler e crio meu comando para executar. Não preciso copiar todas as regras de negócio, tudo que precisa ser feito. Então, se em algum momento eu precisar passar além de enviar e-mail e criar um pedido no banco de dados gerar log de criação de pedido, também estou gerando log, e no meu controller, que usa esse comando, nada mudou. No meu controller da API que gera esse comando, nada mudou. No meu serviço pela linha de comando nada mudou.
+
+[07:50] Essa é a vantagem de utilizar commands e especificamente falando para web, no mundo atual, command handlers e no php você vai ver bastante sobre isso. Só para resumir tudo que foi falado, no vídeo anterior implementamos o padrão command, o padrão de projeto chamado command, só que ele trouxe alguns problemas para o padrão de desenvolvimento atual, para como desenvolvemos hoje, com as técnicas mais atuais, principalmente se tratando de web.
+
+[08:20] Com isso, modificaram ele um pouco para ter um command e o command handler. Dessa forma costumamos organizar aplicações muito bem arquitetadas. De novo, esse mesmo nome que estou chamando de command handler pode ser também chamado de use cases, de application services. Depende muito da literatura, de onde você está estudando.
+
+[08:44] Basicamente, isso é o padrão command e o padrão que utiliza command handler. Mas vamos pensar nisso que já temos aqui. No mesmo método estou gerando pedido com seu orçamento, depois crio no banco de dados, envio um e-mail para o cliente, gero log de criação. Tem muita responsabilidade nesse mesmo método. No próximo capítulo vamos ver como podemos separar isso melhor.
+
+@@06
+Para saber mais: Command
+
+O padrão de projetos Command é, provavelmente, um dos que mais gera confusão no mundo PHP (e acredito que no mundo de desenvolvimento web em geral), já que alguns conceitos mais específicos pro mundo da web surgiram.
+Para você entender melhor sobre o padrão Command "original" (definido no livro da GoF), você pode dar uma olhada nesse link: https://refactoring.guru/design-patterns/command.
+
+Mas, para começar a entender sobre a diferença que foi citada no último vídeo, você pode começar aqui: https://groups.google.com/forum/?hl=en#!topic/dddcqrs/Yfrt4OqPUD0.
+
+Também é muito interessante o estudo mais aprofundado sobre DDD, Clean Architecture, Arquitetura Hexagonal, etc. No estudo sobre esses conceitos, você vai esbarrar no padrão de Command Handlers (que foi aplicado de forma bem simples nesta aula).
+
+@@07
+Faça como eu fiz
+
+Chegou a hora de você seguir todos os passos realizados por mim durante esta aula. Caso já tenha feito, excelente. Se ainda não, é importante que você execute o que foi visto nos vídeos para poder continuar com a próxima aula.
+
+Continue com os seus estudos, e se houver dúvidas, não hesite em recorrer ao nosso fórum!
+
+@@08
+O que aprendemos?
+
+Nesta aula, aprendemos:
+Que um caso de uso em nossa aplicação pode ter várias ações (salvar no banco, enviar e-mail, etc)
+Que um caso de uso deve ser extraído para uma classe específica, ao invés de estar no arquivo da CLI, controller ou algo do tipo
+Que a técnica de extração do caso de uso para uma classe específica pode ser chamada de padrão Command
+A diferença do padrão Command da GoF para o padrão que utiliza Command Handler (muito utilizado com DDD)
 
