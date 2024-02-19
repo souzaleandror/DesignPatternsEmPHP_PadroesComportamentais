@@ -595,3 +595,142 @@ Que um caso de uso deve ser extraído para uma classe específica, ao invés de 
 Que a técnica de extração do caso de uso para uma classe específica pode ser chamada de padrão Command
 A diferença do padrão Command da GoF para o padrão que utiliza Command Handler (muito utilizado com DDD)
 
+#### 19/02/2024
+
+@06-Observer
+
+@@01
+Projeto da aula anterior
+PRÓXIMA ATIVIDADE
+
+Caso queira, você pode baixar aqui o projeto do curso no ponto em que paramos na aula anterior.
+
+@@02
+Ações ao gerar um pedido
+
+[00:00] Bem-vindos de volta a mais um capítulo desse treinamento de padrões de projeto utilizando php e vamos bater um papo sobre esse pedido handler aqui. Nesse método temos bastante coisa. A funcionalidade principal dessa classe é gerar um pedido. Já temos o pedido gerado com nome do cliente, data finalizada, o orçamento definido com seus valores, quantidade de itens, tudo certo. Esse método fez seu trabalho.
+[00:40] A partir desse trabalho algumas ações são executadas, como salvar o que ela fez no banco de dados, enviar por e-mail, gerar um log dessa ação. Essas ações que vão ser executadas depois de gerar um pedido podem ser separadas, então vamos separar.
+
+[01:02] Vou criar uma pasta e vou chamar de acoesAoGerarPedido. Vou criar algumas coisas. Primeiro CriarPedidoNoBanco. Vou também EnviarPedidoPorEmail, com name space ‘Alura\DesingPattern\AcoesAoGerarPedido’. Vou copiar. E LogGerarPedido.
+
+[01:52] Tem algumas classes aqui. Não vamos nos atentar ao nome que eu usei, mas beleza. Agora, sempre que eu executar essa ação, ou seja, gerar pedido, eu quero executar depois algumas ações, como por exemplo CriarPedidoNoBanco, EnviarPedidoPorEmail, fazer um log de gerar pedido. Vamos implementar essas ações.
+
+[02:20] Primeiro, CriarPedidoNoBanco. Vou colocar ‘public function executaAcao(Pedido $pedido)’. Que ação vou executar no caso? Vou executar salvando pedido no banco de dados. Ação executada. Não retornada nada, então é void.
+
+[02:47] Posso até exibir algum dado do pedido? Não precisa. O log gerar pedido vai ser bem parecido, então vou copiar e colar. Gerando log de geração de pedido. Ficou meio redundante, mas tudo bem. E na parte de enviar e-mail, enviando e-mail de pedido gerado.
+
+[03:26] Tenho todas as ações implementadas. Imagine que isso está indo no banco, que está salvando um log, enviando realmente um pedido por e-mail. O que quero agora é executar no meu command handler. Primeiro vou criar o salvador de pedidos, vamos chamar de PedidoRepository, CriarPedidoNoBanco. Sei que o nome não é dos melhores, mas podemos relevar.
+
+[04:00] Depois quero executar o LogGerarPedido, e também o EnviarPedidoPorEmail. Tenho as três classes. Repare que o php storm já importou para mim. E agora posso executar essas três ações. Venho em PedidoRepository, executaAcao no pedido, LogGerarPedido executaAcao no pedido, e enviar por e-mail executaAcao no pedido. Já está relativamente melhor, porque as responsabilidades foram separadas, mas ainda assim tem muita coisa aqui.
+
+[04:45] Imagine que toda a lógica de criar pedidos já não está mais nessa classe, mas ainda estou chamando especificamente, e se depois de fizer isso eu quiser, por exemplo, mandar para um sistema de mensageria essa ação, para que outro sistema, outro micro serviço processe essa ação e tome alguma atitude, algum tipo de auditoria, esse tipo de coisa? Eu teria que criar uma nova classe, chamar um novo método. Entra naquele problema que esse método cresceria para sempre dessa forma. No próximo vídeo vamos ver uma forma de melhorar esse código.
+
+@@03
+Muitas responsabilidades
+PRÓXIMA ATIVIDADE
+
+Um Command Handler tem como responsabilidade, normalmente, apenas orquestrar as tarefas a serem executadas, ou seja, chamar as classes necessárias que realizam as tarefas desejadas. No nosso caso, o Command Handler tinha todo o código do fluxo em seu corpo.
+Por que separar cada uma das tarefas em uma classes separadas é benéfico?
+
+Porque, com classes menores e mais concisas, é mais fácil encontrar possíveis problemas
+ 
+Alternativa correta! Se em algum momento o log da aplicação parar de funcionar, nós sabemos que há uma classe específica para este propósito e podemos começar a depuração por ela.
+Alternativa correta
+Porque, quanto mais classes, mais mostramos para os nossos superiores que estamos produzindo
+ 
+Alternativa correta
+Porque a implementação de cada tarefa pode mudar com o tempo e o Command Handler não deve precisar saber disso
+ 
+Alternativa correta! Imagine que a ferramenta utilizada para enviar e-mails mude depois de alguns anos. O nosso Command Handler não precisa saber deste detalhe específico, então é interessante que cada classe seja responsável apenas por uma pequena tarefa.
+
+@@04
+Adicionando ações como observers
+
+[00:00] Bem-vindos de volta. Vamos botar a mão na massa e melhorar esse código. Pensa comigo. Quando essa ação é executada, quando GerarPedidoHandler é executado, alguma coisa tem que acontecer, algumas coisas têm que acontecer. Que coisas são essas? Preciso salvar no banco, gerar um log, enviar por e-mail. Algumas coisas precisam acontecer com pedido gerado.
+[00:25] O que vamos fazer é salvar todas essas ações como ações do meu command handler. Vou criar um novo atributo, vai ser um array, uma lista, acoesAposGerarPedido, vai ser um array que começa vazio, e consigo aqui adicionarAcaoAoGerarPedido.
+
+[00:52] Só que qual o tipo dessa ação? Como vou saber que essa ação possui, que esse objeto possui o método executaAcao? Mais uma vez precisamos de um objeto, certo? Vamos criar uma nova interface do php, AcaoAposGerarPedido. Tenho a interface criada, que precisa ter esse método.
+
+[01:25] CriarPedidoNoBanco implementa essa interface AcaoAposGerarPedido, em LogGerarPedido também vai implementar, e em EnviarPedidoPorEmail. Tudo certo. Agora vou adicionar várias ações após gerar pedido, e o tipo é AcaoAposGerarPedido, e vou adicionar naquele array essa ação.
+
+[02:06] Quando eu criar esse meu pedido handler posso adicionar várias ações que vão ser executadas depois de gerar pedido. Posso remover isso tudo e fazer um foreach. Para cada uma das ações ao gerar pedido vou executar a ação. E dessa ação vou fazer o php storm me ajudar dizendo que esse array é do tipo acoesAposGerarPedido. Agora o php storm vai saber me dizer qual o método que temos aqui, executaAcao nesse pedido.
+
+[02:40] Agora posso criar quantas ações eu quiser que essa classe GerarPedidoHandler não vai ser alterada, não vai ser modificada. Posso, por exemplo, criei o handler e vou adicionar no GerarPedidoHandler adicionarAcaoAoGerarPedido um novo CriarPedidoNoBanco, vou gerar o de log GerarPedido.
+
+[03:08] Por enquanto vou adicionar só essas duas ações. Vou executar esse código, ver se tudo dá certo. Esqueci de passar os parâmetros. Vou passar todos os parâmetros, php gera pedido, o valor do orçamento é 1.234,56, tenho sete itens, o cliente é Vinicius Dias, salvando pedido no banco de dados e gerando log. Geração de pedido.
+
+[03:40] Agora, antes de gerar o log quero que ele mande e-mail. Adiciono uma ação EnviarPedidoPorEmail. Eu não mexi em nada na minha GerarPedidoHandler, mas adicionei no meu comando, na minha linha de comando essa ação e está lá, salvando pedido, enviando e-mail e gerando log, todas as ações sendo executadas de forma dinâmica.
+
+[04:05] Vamos repensar no que fizemos aqui. Temos um alvo de uma ação que vai acontecer, temos o gerador da ação que vai ser o que vai acontecer, e temos ouvintes dessa ação. Alguém que está esperando a ação acontecer, e quando acontecer faz algo com ela, atualiza o pedido, faz qualquer coisa com o pedido gerado. Esse padrão diz que o pedido é nosso sujeito dessa ação e essas classes que os observadores, os ouvintes dessa ação, que vai pegar a partir da ação esse sujeito, esse alvo, e realizar alguma ação com ele.
+
+[04:52] Esse padrão de projeto é chamado de observer. Um exemplo do mundo real disso seria, por exemplo, você acessa todos os dias um site de notícias. Todos os dias você executa a ação de ir lá e acessar. Só que agora ao invés de fazer isso manualmente você quer se subscrever na newsletter deles, na carta semanal ou diária que eles mandam por e-mail. Você vai colocar lá e vai se inscrever como ouvinte dessa ação de enviar a notícia.
+
+[05:23] Com isso você vai receber notícia e vai ser notificado dessa notícia sem que precise estar no site deles especificamente. Essas ações são notificadas sem estar diretamente codificadas no método da ação em si. Esse padrão mais uma vez é chamado de observer. No próximo vídeo vamos ver algumas particularidades interessantes do php em relação a esse padrão de projeto.
+
+@@05
+Observers no PHP
+
+[00:00] Bem-vindos de volta. Já vimos o que é o padrão de projeto observer, vimos como implementar, mas vamos conversar um pouco sobre ele no php. Primeiro, não é comum que implementemos observers no command handler. O command handler só deve executar uma ação e não avisar ninguém, não fazer mais nada além disso.
+[00:22] O que seria comum nesse caso, algo mais próximo da realidade, seria se você tem um comando que gera pedido, ele vai salvar no banco de dados, é da natureza das aplicações php salvar as coisas no banco de dados, é normal. Esse é o comum. Não estou dizendo que isso que fiz está errado, mas estou falando do mais próximo da realidade, do dia a dia.
+
+[00:45] Você salvaria no banco de dados. E nesse repositório que salva um pedido no banco de dados você adicionaria os observers, isso faz muito mais sentido no mundo real, é muito mais comum no mundo real, porque um repositório você configura no gerenciador de dependências, igual fizemos no nosso curso de MVC aqui da Alura.
+
+[01:06] Já um command handler você não vai utilizar tantas coisas dele. Deve ser mais simples. Por isso não é comum ter as ações nele. Mas, para o nosso exemplo, como não estamos trabalhando com web, com um projeto grande e real, isso funcionou perfeitamente para conhecermos o padrão.
+
+[01:23] Outro detalhe é que esse padrão é tão conhecido, tão famoso, que há bastante tempo, e há bastante tempo mesmo, o próprio pessoal, a equipe do php adicionou no core da linguagem, ou seja, na linguagem em si, algumas interfaces para você implementar esse padrão de projeto. Vou te mostrar como seria sem criar tudo isso por conta própria.
+
+[01:48] Vou apagar isso aqui e isso aqui. O php fornece uma interface chamada splSubject. Essa interface quer dizer que essa classe GerarPedidoHandler está implementando ou a ação ou algo que vai notificar a outras pessoas, a observers que alguma coisa aconteceu. Então o subject, que é o alvo que eu disse, o sujeito que vai executar a ação ou ser o alvo da ação implementa essa interface.
+
+[02:15] Se eu apertar "Alt + Enter” aqui, o php storm vai adicionar para nós os métodos dessa interface. O primeiro é o attach, que simplesmente é para salvarmos naquele array algum observer. Vamos fazer isso, ‘$this->acoesAposGerarPedido[] = $observer’.
+
+[02:35] Repare que ele é de um tipo diferente do que estávamos usando, mas chegamos até lá. Agora, o detach é para remover. Se quiséssemos remover um observer. No nosso caso não vou implementar isso, mas caso você queira implementar não é muito difícil. Mas eu não vou porque foge do assunto do nosso exemplo.
+
+[03:00] Agora vou implementar o notify. Basicamente, é um método que vai chamar todos os observers, que vai executar as ações dos observers. O que vou fazer é aquele foreach, para cada uma das ações ao gerar pedido como ação. E repare que aqui é um splObserver, então não é esse o tipo mais, AcaoAposGerarPedido, é splObserver. Mudamos o tipo. Vou inclusive apagar isso tudo.
+
+[03:32] Voltando, a classe splObserver, essa interface, na verdade, possui o método update, que é a execução da ação em si, que vai receber o pulo do gato. Normalmente, o padrão observer a própria classe que vai ser atualizada é a que chama esse método, logo deveria passar por parâmetro o this, só que as ações estão sendo executadas no pedido, certo? Então vamos fornecer o pedido gerado. Vamos deixar como ‘public Pedido $pedido’.
+
+[04:11] Agora sim tenho o pedido, estou salvando pedido, igual pedido, e no final de tudo $this->notify. Ou seja, depois de executar a ação, eu notifico todos os observers. Estou passando por todos. Então vamos modificar nossas ações.
+
+[04:35] Ao invés de implementar ação após gerar pedido, ele vai implementar um splObserver, ao invés de ser executação, é update de um splSubject. Muda um pouco, mas na prática para nós vai funcionar exatamente igual.
+
+[04:50] Vou atualizar todos os outros. Se eu quisesse pegar o pedido, eu pegaria do pedido, que é o comando, no caso. Por exemplo, no cria pedido no banco, na verdade lá no e-mail, vou exibir o nome do cliente, ‘echo $pedido->pedido->nomeCliente’.
+
+[05:40] Vamos testar isso tudo, ver se funciona. Faltou um detalhe, o attach, agora que mudamos o método para aderir a interface do próprio php. Vamos ver se está tudo certo agora.
+
+[06:04] Salvando pedido no banco de dados. Exibi meu nome e enviando por e-mail gerando log. Implementamos exatamente a mesma coisa, só que usando algumas classes do php, algumas interfaces do php. Mas se você reparar precisamos dar algumas voltas, fazer algumas coisas para implementar. Por isso, por padrão, normalmente, via de regra, você vai ver implementado da primeira forma. Você vai ver implementado de forma personalizada, criando a própria interface com nomes específicos, e não utilizando a interface genérica do php, splObserver e splSubject.
+
+[06:40] Esse vídeo foi só para explicar que existe isso no mundo do php. Caso você veja você não vai ficar perdido por causa dos nomes genéricos. É assim que funcionam as interfaces do php. Mas no nosso caso vamos deixar implementado da forma anterior, do vídeo anterior, então vou desfazer isso tudo. Como estou utilizando git aqui, git restore e beleza. Tudo já foi desfeito e estou com meu código original de novo, utilizando a interface personalizada e ações após gerar pedido.
+
+[07:13] Agora já fizemos bastante coisa, aprendemos muitos padrões de projeto, e quero implementar uma coisa simples. Quero implementar uma lista dos pedidos, ou uma lista dos orçamentos, quero visualizar uma lista na linha de comando mesmo, vamos conversar sobre isso no próximo vídeo.
+
+@@06
+Para saber mais: Observer
+PRÓXIMA ATIVIDADE
+
+O padrão Observer é comumente utilizado por diversas bibliotecas que trabalham com eventos. Muito provavelmente, seu framework preferido (Symfony, Laravel, Phalcon, etc) possui algum componente que lida com eventos.
+A forma como o padrão foi implementado aqui na aula é a mais simples e pura, mas existem diversas modificações que podem ser feitas. Dar nomes a eventos para filtrar quais ações serão executadas, etc.
+
+Para entender mais sobre a teoria deste padrão, você pode conferir este link: https://refactoring.guru/design-patterns/observer.
+
+Já para conhecer melhor as interfaces do próprio PHP: https://www.php.net/manual/pt_BR/class.splobserver.php.
+
+@@07
+Faça como eu fiz
+PRÓXIMA ATIVIDADE
+
+Chegou a hora de você seguir todos os passos realizados por mim durante esta aula. Caso já tenha feito, excelente. Se ainda não, é importante que você execute o que foi visto nos vídeos para poder continuar com a próxima aula.
+
+Continue com os seus estudos, e se houver dúvidas, não hesite em recorrer ao nosso fórum!
+
+@@08
+O que aprendemos?
+PRÓXIMA ATIVIDADE
+
+Nesta aula, aprendemos:
+Que deixar a implementação de todas as tarefas de um caso de uso da aplicação na mesma classe pode trazer problemas
+Dificuldade de manutenção
+Classes muito grandes e difíceis de ler
+Problemas quando precisar alterar a implementação de uma das tarefas
+Que é mais interessante separar cada ação em uma classe separada
+Como ligar um evento ocorrido com suas ações, através do padrão Observer
+
