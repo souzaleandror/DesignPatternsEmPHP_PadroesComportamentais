@@ -601,7 +601,6 @@ A diferença do padrão Command da GoF para o padrão que utiliza Command Handle
 
 @@01
 Projeto da aula anterior
-PRÓXIMA ATIVIDADE
 
 Caso queira, você pode baixar aqui o projeto do curso no ponto em que paramos na aula anterior.
 
@@ -627,7 +626,6 @@ Ações ao gerar um pedido
 
 @@03
 Muitas responsabilidades
-PRÓXIMA ATIVIDADE
 
 Um Command Handler tem como responsabilidade, normalmente, apenas orquestrar as tarefas a serem executadas, ou seja, chamar as classes necessárias que realizam as tarefas desejadas. No nosso caso, o Command Handler tinha todo o código do fluxo em seu corpo.
 Por que separar cada uma das tarefas em uma classes separadas é benéfico?
@@ -705,7 +703,6 @@ Observers no PHP
 
 @@06
 Para saber mais: Observer
-PRÓXIMA ATIVIDADE
 
 O padrão Observer é comumente utilizado por diversas bibliotecas que trabalham com eventos. Muito provavelmente, seu framework preferido (Symfony, Laravel, Phalcon, etc) possui algum componente que lida com eventos.
 A forma como o padrão foi implementado aqui na aula é a mais simples e pura, mas existem diversas modificações que podem ser feitas. Dar nomes a eventos para filtrar quais ações serão executadas, etc.
@@ -716,7 +713,6 @@ Já para conhecer melhor as interfaces do próprio PHP: https://www.php.net/manu
 
 @@07
 Faça como eu fiz
-PRÓXIMA ATIVIDADE
 
 Chegou a hora de você seguir todos os passos realizados por mim durante esta aula. Caso já tenha feito, excelente. Se ainda não, é importante que você execute o que foi visto nos vídeos para poder continuar com a próxima aula.
 
@@ -724,7 +720,6 @@ Continue com os seus estudos, e se houver dúvidas, não hesite em recorrer ao n
 
 @@08
 O que aprendemos?
-PRÓXIMA ATIVIDADE
 
 Nesta aula, aprendemos:
 Que deixar a implementação de todas as tarefas de um caso de uso da aplicação na mesma classe pode trazer problemas
@@ -733,4 +728,164 @@ Classes muito grandes e difíceis de ler
 Problemas quando precisar alterar a implementação de uma das tarefas
 Que é mais interessante separar cada ação em uma classe separada
 Como ligar um evento ocorrido com suas ações, através do padrão Observer
+
+
+#### 20/02/2024
+
+07-Iterator
+
+@@01
+Projeto da aula anterior
+
+Caso queira, você pode baixar aqui o projeto do curso no ponto em que paramos na aula anterior.
+
+[Title](https://caelum-online-public.s3.amazonaws.com/1668-php-design-pattern-comportamental/06/php-design-pattern-projeto-completo-aula-6.zip)
+
+@@02
+Visualizando uma lista de orçamentos
+
+[00:00] Bem-vindos ao último capítulo desse nosso curso de padrões de projeto comportamentais utilizando php. Vamos agora fazer uma coisa bem simples. Vou criar um comando, um arquivo para rodar na linha de comando que exibe uma lista aleatória de orçamentos que vou criar. Vou criando conforme for falando.
+[00:25] Vamos criar alguns orçamentos. Primeiro vou precisar do nosso autoload, vendor/autoload, ‘use Alura\DesignPattern\Orcamento’, vamos utilizar essa classe bastante, e vamos lá. Vou ter aqui uma ‘$listaOrcamentos =[];’, vou criar o orçamento1, igual um orçamento, esse orçamento1 vai ter como quantidade de itens sete, vai estar aprovado já, e vai ter o valor de 1.500,75 reais. Vou copiar isso para criar mais dois orçamentos. O orçamento2 e o orçamento3:
+
+[01:20] O orçamento2 vai estar reprovado e o orçamento3 vai estar finalizado. O 2 vai ter só três itens, vai ser 150 reais. O 3 vai ter cinco itens e vai custar 1.350. Tenho três orçamentos que vou adicionar na lista de orçamentos, igual a orçamento1, orçamento2 e orçamento3.
+
+[01:52] Até aqui absolutamente nada novo, nada de mais, só vamos fazer um foreach para exibir algumas coisas, um foreach para cada um dessa lista de orçamentos, como orçamento, vamos exibir o valor, o estado dele e algumas coisas assim. Então, ‘echo “Valor: “. $orcamento->valor’, ‘echo “Estado: “. Get_class($orcamento->estadoAtual)’, e a quantidade de itens, ‘echo Qtd. Itens: " . $orcamento->quantidadeltens’.
+
+[02:44] Só isso, sem nada complexo. Se eu executar esse comando, temos o resultado como esperado, sem segredo. 1.500, estado aprovado, com sete itens. 150, reprovado, três itens. Finalizado, cinco itens. Tudo ok.
+
+[03:16] Agora imagine que consigo pegar nessa lista de orçamentos qualquer coisa, tipo uma string. Eu sou muito vacilão, pois quebrei o código. Está lá. Vou executar essa lista de orçamentos, erro. Quanto erro no meu código por causa de uma bobeira que eu dei.
+
+[03:28] O que acontece? No php, os arrays não são tipados. Conseguimos tipar propriedade, retorno, parâmetro, mas não conseguimos tipar um array, então uma prática muito comum, inclusive é uma das regras do object calistenics, voltado para php, que é criar classes que representam coleções. O que vamos fazer agora é criar uma classe que representa uma lista de orçamentos, assim vou ter certeza que todos os itens nessa lista são orçamentos. Mas isso a gente faz no próximo vídeo.
+
+@@03
+Arrays em PHP
+
+Os arrays em PHP, embora sejam muito versáteis, têm diversos problemas. Primeiramente, eles são otimizados para tudo e para nada ao mesmo tempo, ou seja, se é performance que você quer, não são os arrays que você vai usar. Além disso, não é possível informar o tipo dos elementos de um array do PHP.
+Que problema pode gerar não poder tipar um array no PHP?
+
+Perde-se ainda mais performance, por não se saber o tipo em tempo de execução
+ 
+Alternativa correta
+O nosso código fica mais feio, adicionando o tipo array, ao invés de um tipo específico na lista
+ 
+Alternativa correta
+Podemos estar esperando uma lista de um tipo específico e nos deparar com erros, por ter algum elemento inesperado no array
+ 
+Alternativa correta! Como é possível colocar qualquer tipo de dado em um array, não podemos ter a certeza de que todos os elementos dele possuem aquele tipo. Inclusive, uma das regras de Object Calisthenics (vale a pena a leitura) diz que devemos sempre encapsular as nossas coleções em classes específicas.
+
+@@04
+Representando uma coleção de orçamentos
+
+[00:00] Bem-vindos de volta. Vamos resolver aquele problema. Talvez você esteja se perguntando “mas Vinicius, não era para você estar criando um command, um command handler para gerar essa lista?”. No caso, imagine que isso está dentro do nosso código de domínio, que estamos realmente só pegando essa lista do banco de dados, alguma coisa assim. O que quero é poder representar uma lista de orçamentos. É isso que vamos fazer.
+[00:23] Não sei se existe um nome para a lista de orçamentos, então vou chamar de lista de orçamentos. Caso exista um nome para você que trabalha com orçamentos e existe um coletivo de orçamentos, pode colocar esse nome na classe que vai ficar mais legal.
+
+[00:38] Vou ter um array de orçamentos e sei que todos eles vão ser orçamentos, todos os itens desse array vão ser orçamentos, e só consigo acessar esse array através de um método que vou criar, então ‘public function addOrcamento (Orçamento $orcamento)’ e adiciono na minha lista orçamentos. Vou obviamente começar esse array vazio.
+
+[01:10] Eu, Vinicius, não gosto, talvez você já tenha percebido até aqui se você fez treinamentos anteriores, de inicializar propriedades direto. Já fiz algumas vezes, mas prefiro evitar, por isso vou criar um construtor. Isso é um gosto pessoal, não tem nenhum problema inicializar daquele jeito. Estou te passando meus vícios e macetes, mas sem problema.
+
+[01:30] Tenho uma lista de orçamentos e agora preciso de um jeito de pegar esses orçamentos. Vou chamar de orçamentos. Vou retornar essa lista. Tenho acesso agora a essa lista depois. O que vou fazer agora é ao invés de criar um array, criar uma lista de orçamentos como new ListaDeOrcamentos.
+
+[02:02] Agora, ‘$listaOrcamentos->addOrcamento($orcamento1)’ e vou copiar para o orçamento 2 e orçamento 3. Se eu executar esse código, não deu nada. O que aconteceu? Que erro aconteceu? Não tem erro nenhum, php não está me mostrando erro. O que será que houve?
+
+[02:28] Estamos tentando fazer o foreach em um objeto, e quando o php tenta fazer foreach em alguma coisa que não é array aparentemente não faz nada, ele não avisa que deu algum erro. Repare que estamos chegando até aqui, ele está executando sem erro, até depois. Como será que resolvemos isso?
+
+[02:55] No nosso caso é muito simples. Podemos pegar os orçamentos em si, que é aquele array. Funcionou. Mas aí essa lista não está sendo a representação de uma lista em si. Eu queria poder fazer isso, queria não precisar ter acesso ao array, e não quero liberar acesso ao array, não quero que esse método seja necessário. Como posso tornar isso possível? Vamos ver no próximo vídeo.
+
+@@05
+Permitindo navegar na lista com Iterator
+
+[00:00] Bem-vindos de volta. Vamos fazer exatamente o que eu falei. Não quero liberar o acesso aos meus orçamentos, porque senão volto para aquele problema inicial. O retorno da lista de orçamentos qualquer pessoa pode adicionar qualquer coisa, uma string, e quebrar esse meu array, meu código. O que quero fazer é um foreach direto nessa lista, nesse objeto, e o php fornece para nós uma forma muito interessante de tornar esse objeto percorrível.
+[00:32] Posso implementar uma interface do php chamada iterator, só que entramos em um problema. Vou apertar "Alt + Enter" e preciso implementar alguns métodos, algumas funcionalidades. Vamos ver quais são, current, que informa o item atual do loop, no momento em que estivermos percorrendo. O próximo item dessa iteração é a chave atual. Se o item atual é um item válido, se ainda existe um item nesse ponto, e voltar a retroceder.
+
+[01:08] Só que pare para pensar. Só quero fazer um foreach, não quero precisar implementar o rewind, não quero implementar esses métodos, porque eu não vou chamar. Quero que o php se vire, então tudo que quero fazer é um foreach, não quero uma lógica específica para cada uma das coisas, quero um foreach e só. Se em algum momento precisar implementar alguma forma de um objeto ser percorrível de forma personalizada, você vai implementar o interface iterator.
+
+[01:44] Mas no nosso caso o que quero é que já tenho um objeto ou qualquer coisa aqui dentro que é percorrível, que no nosso caso é um array, então o que quero fazer na verdade é expor esse iterator. Ou seja, vou criar um iterator, vou criar alguma coisa percorrível a partir desse array e expor isso. E o php que se vire para encontrar e para se achar.
+
+[02:05] Isso é possível através do iterator aggregate. Vou adicionar, e preciso de um método. Um método que retorna um iterator. Vamos dar uma olhada na documentação do php para vocês entenderem um pouco melhor.
+
+[02:35] Aqui basicamente é uma interface para criar um interador externo, mas o que ele me retorna? O que isso tem que retornar? Ele tem que retornar alguma implementação dessa interface, ou um iterator em si. Então não posso simplesmente retornar um array. Não posso simplesmente fazer isso.
+
+[02:56] Se estiver complicando, volta um pouco o vídeo que falei do que é iterator, mas já vou explicar de novo isso tudo. Acompanha comigo. Se estiver um pouco confuso vou fazer um resumo daqui a pouco.
+
+[03:08] Vamos tentar expor algo percorrível pelo php direto pelo array. Vamos ver se isso já resolve, se já funciona. Se eu tentar executar, dá erro. O objeto retornado pelo iterator não é um objeto.
+
+[03:23] O que quero fazer então? Vou criar um iterator, algo percorrível a partir de um array, e o nome disso é exatamente array iterator. Um array iterator recebe um array e expõe algo percorrível, um objeto que dê para fazer um foreach. Agora, se eu executo está lá. Tenho uma lista de orçamentos que só pode ser percorrida através de um loop. Não posso acessar o array em si, não posso acessar uma chave. Preciso ver essa lista toda, e é exatamente o que eu quero, não quero expor meu array.
+
+[04:00] Com isso, consegui transformar meu objeto, a instância da minha lista de orçamentos em uma lista realmente, em algo que consigo percorrer. Agora, vamos recapitular um pouco o que eu fiz.
+
+[04:12] O php precisa de algo percorrível para conseguir fazer um foreach. Basicamente isso. Ele precisa percorrer algo. Para ele percorrer, este algo percorrível precisa ser um array ou um objeto percorrível. Esse objeto percorrível pode ser inúmeras coisas, mas normalmente é um iterator. iterator é basicamente uma representação de algo que você pode percorrer, e nada mais do que isso, e esse é o padrão de projetos que está sendo aplicado aqui.
+
+[04:42] Através de algum conteúdo central, que no caso é nosso array de orçamentos, expomos isso em forma de lista, para que o usuário, para que o cliente que estiver usando nosso código percorra sem saber como está sendo a implementação lá dentro.
+
+[04:58] Aqui você não sabe que isso é um objeto, se é um array, uma pilha, uma lista, uma fila, independente do que for você está percorrendo de forma sequencial, então o que fizemos inicialmente foi tentar transformar essa lista em um iterator em si, só que teríamos que implementar muita coisa, como avançar, retroceder, verificar se é válido, esse tipo de coisa.
+
+[05:20] Só que o php já faz isso tudo para nós através de, por exemplo, o array iterator. Ele cria um iterador, algo que é percorrível, a partir de um array, e eu exponho isso.
+
+[05:30] Implementando essa interface que me faz criar esse método, o php entende que esse objeto é um agregador de iterator, ou seja, ele tem o iterator. Vou acessar esse iterator e desse iterator vou fazer o loop, vou percorrer. Dessa forma conseguimos implementar uma lista feita por nós com total segurança de que todos os itens vão ser orçamentos, que não vai ter nada estranho lá, e de quebra conseguimos não expor essa lista, só fazer o foreach e pegar os elementos corretos da forma como queremos.
+
+@@06
+Filtrando orçamentos
+
+Na nossa classe ListaDeOrcamentos, agora nós queremos liberar acesso a uma lista dos orçamentos finalizados.
+Escreva o corpo do método chamado orcamentosFinalizados(), que retorna um array apenas com os orçamentos que tenham $estadoAtual finalizado.
+
+Um exemplo de código, que atende o que foi pedido no enunciado, é:
+public function orcamentosFinalizados(): array
+{
+    return array_filter(
+        $this->orcamentos,
+        fn (Orcamento $orcamento) => $orcamento->estadoAtual instanceof Finalizado
+    );
+}
+
+@@07
+Para saber mais: Iterator
+
+Assim como com o Observer, o PHP já tem algumas facilidades para implementar o padrão Iterator, mas de forma bem mais interessante.
+Caso você queira entender melhor a teoria por trás do padrão e sua aplicação sem a mão amiga do PHP, você pode conferir este link: https://refactoring.guru/design-patterns/iterator.
+
+Caso queira ler mais sobre os Iterators disponíveis no PHP:
+
+https://www.php.net/manual/pt_BR/class.iterator.php
+https://www.php.net/manual/pt_BR/spl.iterators.php
+
+@@08
+Faça como eu fiz
+
+Chegou a hora de você seguir todos os passos realizados por mim durante esta aula. Caso já tenha feito, excelente. Se ainda não, é importante que você execute o que foi visto nos vídeos para poder continuar com os próximos cursos que tenham este como pré-requisito.
+
+Continue com os seus estudos, e se houver dúvidas, não hesite em recorrer ao nosso fórum!
+
+@@09
+Projeto do curso
+
+Caso queira, você pode baixar aqui o projeto completo implementado neste curso.
+
+@@10
+O que aprendemos?
+
+Nesta aula, aprendemos:
+Que os arrays do PHP, embora muito versáteis, podem trazer alguns problemas
+Que uma das regras de Object Calisthenics é sobre encapsular coleções em classes específicas
+Como acessar um objeto, como se fosse uma lista percorrível
+Que, a esta técnica, se dá o nome de Iterator
+Funcionalidades que o PHP nos fornece para implementar de forma muito simples o padrão Iterator
+
+@@11
+Conclusão
+
+[00:00] Meus parabéns, você finalizou o curso de padrões de projeto comportamentais com o php. Aprendemos bastante coisa, muito importante. Começamos falando de padrões bem tranquilos de entender, como strategy, e depois fomos complicando, já direto com chain of responsibility, juntamos um pouco com o template method, e fomos avançando, falando de state, command, até que no final usamos coisas específicas do php, no observer e no iterator.
+[00:28] Só que esse monte de padrão de projeto pode entrar na sua cabeça e você vai pensar que precisa implementar isso o tempo todo, em todos os seus projetos você vai implementar isso. E acredite, você pode estar achando que não, mas eu já fiz isso. Já peguei um projeto que era um simples hello world e apliquei três, quatro padrões de projeto nele.
+
+[00:48] Se eu puder deixar um recado nessa conclusão é não utilize padrões de projeto quando eles não forem necessários. Se você só tem um algoritmo que vai ser utilizado, uma estratégia, para que extrair essa classe de strategy? Se você só tem um estado no seu objeto, você não tem transições complexas e regras específicas, para que você vai implementar o padrão state, que dá tanto trabalho?
+
+[01:15]Análise quando faz sentido implementar cada um dos padrões, e só implemente se realmente for necessário. Tudo que vimos aqui foi uma introdução a cada um dos padrões. Existem livros e livros escritos sobre cada um dos padrões. Existe o livro oficial de um grupo de quatro pessoas carinhosamente conhecidos como A Gangue dos 4, The Gang of 4. Esse é o livro que originou todos esses padrões e vários outros. Se não me engano são 23 padrões de projeto e vamos tratar sobre vários outros em cursos futuros na Alura, mas neste treinamento falamos dos principais padrões comportamentais.
+
+[01:52] Vimos bastante coisa, aprendemos bastante coisa, e mais uma vez queria te parabenizar, porque o estudo de boas práticas, de padrões de projeto, de melhores princípios é muito importante. A orientação a objetos ajuda muito no nosso dia a dia como desenvolvedor ou como desenvolvedora, e se simplesmente nos contentarmos com fazer um sistema com MVC e mais nada, não estudar arquitetura, como melhorar nosso sistema, acabamos criando monstros.
+
+[02:16] Eu infelizmente numa base diária todos os dias dou manutenção para códigos que são monstros, que alguém lá no início não pensou nesse tipo de coisa, e se você puder evitar o seu próprio retrabalho no futuro, você mesmo vai se agradecer bastante.
+
+[02:33] Mais uma vez, eu sei que já falei isso, mas vou falar de novo, não utilize padrões quando não for necessário, mas estude muito para saber quando é necessário aplicar de forma correta. Espero que você não tenha se enchido de tanto que falei nesse treinamento, sei que foi bastante, mas é um conteúdo muito importante, e não poderia falar menos do que falei.
+
+[02:52] Queria te agradecer por ter aguentado até o final, e espero te ver em futuros treinamentos aqui na Alura, inclusive sobre outros padrões de projeto. Te vejo na próxima.
 
