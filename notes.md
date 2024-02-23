@@ -452,9 +452,153 @@ Criamos um template de algoritmo que estava sendo replicado em mais de uma class
 Aprendemos que a esta técnica foi dado o nome de Template Method
 Vimos que é possível aplicar mais de um padrão no mesmo código
 
+##### 23/04/2024
+
+@04-State
+
+@@01
+Projeto da aula anterior
+
+Caso queira, você pode baixar aqui o projeto do curso no ponto em que paramos na aula anterior.
+
+https://caelum-online-public.s3.amazonaws.com/1668-php-design-pattern-comportamental/03/php-design-pattern-projeto-completo-aula-3.zip
+
+@@02
+Adicionando estados ao orçamento
+
+[00:00] Sejam muito bem-vindos de volta a mais um capítulo deste curso de padrões de projeto utilizando php. Agora o que temos que fazer é que surgiu uma demanda para uma nova regra onde um orçamento pode receber um desconto extra. Ou seja, a qualquer momento o cliente está chorando, apesar de já ter recebido um orçamento, de ter uma calculadora de desconto, no próprio orçamento ele pode solicitar um desconto extra.
+[00:26] Só que esse desconto extra vai ser aplicado dependendo do estado do orçamento, porque o orçamento pode estar em aprovação, pode estar aprovado ou reprovado, e pode já ter sido finalizado. Se o orçamento está em aprovação significa que ainda não foi aprovado, dá para o cliente chorar um pouco mais. Ele consegue mais 5% de desconto.
+
+[00:48] Se o orçamento já foi aprovado e mesmo assim o cliente está chorando desconto, a gente dá 2% de desconto para ele. Agora, se o orçamento foi reprovado ou já está finalizado, aí não faz sentido dar desconto.
+
+[01:00] Vamos ter um valor que vai ser o estadoAtual desse orçamento, ainda não sei que valor vai ser esse, provavelmente uma string. E aqui vou criar um método que aplica um desconto extra. Nesse método, o valor vai receber o próprio valor menos um cálculo de desconto extra.
+
+[01:30] Esse calculaDescontoExtra vai retornar o cálculo percentual desse desconto baseado no estado. Se o estado for igual a em aprovação, aí vamos retornar o valor vezes 5%, que foi o combinado. Agora, se o estado atual for aprovado, mesmo sem o cliente estar chorando desconto, vamos dar um desconto de 2%. Caso contrário, se não está nem em aprovação, nem aprovado, vamos lançar uma exceção, dizendo que orçamentos reprovados e finalizados não podem receber desconto.
+
+[02:30] Mel na chupeta, moleza. Temos a implementação do método que calcula um desconto extra, que devolve um float e pode acabar lançando uma exceção em alguns casos.
+
+[02:44] Só que pensa, de novo, um monte de if para representar os estados, e além desse monte de if, se formos aprovar um estado, pense que o orçamento acabou de nascer, está em aprovação, e quero aprovar. Só que depois de aprovado só posso finalizar, não posso depois reprovar, não posso colocar esse orçamento em um estado de reprovado. Então preciso criar cada um dos métodos e para aprovar, reprovar, em cada um desses métodos preciso ficar verificando.
+
+[03:25] Para reprovar, reprova. Preciso verificar se o orçamento está em um estado de aprovação, e para finalizar preciso verificar se está aprovado ou reprovado, não pode ir de em aprovação direto. Existem muitas regras e vou acabar enchendo muito minha classe de orçamento. Seria interessante se pudéssemos extrair isso e refatorar de alguma forma. Vamos fazer exatamente isso no próximo vídeo.
+
+@@03
+Valores em string
+
+Ao começar a tratar sobre regras dos estados, foi implementada a verificação do estado atual de um orçamento, utilizando strings.
+Aponte dois problemas desta abordagem.
+
+Strings não possuem comportamento, então precisamos adicionar ifs para realizar o cálculo de desconto extra
+ 
+Alternativa correta! Como strings são um tipo primitivo, não poderíamos delegar o cálculo do desconto extra para o valor do $estadoAtual. Precisamos adicionar vários ifs na classe de orçamento para isso.
+Alternativa correta
+Strings são lentas e temos um problema de performance ao armazenar o estado desta forma
+ 
+Alternativa correta
+É muito fácil digitar o nome de um estado errado e por serem simples strings, a IDE não nos ajudaria
+ 
+Alternativa correta! Ter valores com significado no domínio apenas como string é um problema pois, a qualquer momento, podemos digitar o texto errado e isso pode causar uma grande dor de cabeça. Não é um problema fácil de debugar e a IDE não nos ajuda neste caso.
+
+@@04
+Extraindo classes de estado
+
+[00:00] Bem-vindos de volta. Vamos pensar numa forma de refatorar. Primeiro, além daqueles problemas que eu comentei de ter que colocar muitos ifs e vários métodos com esses ifs, estamos usando string. A qualquer momento podemos escrever o nome do estado tal errado. Alguns ainda poderiam dizer que posso colocar uma propriedade estática em aprovação que aí temos a ideia para nos ajudar e colocamos o valor dela como aprovação, mas ainda assim não é uma solução elegante. É uma solução muito falha.
+[00:38] Então, para resolvermos, o que podemos fazer? Criar os estados no orçamento como classes separadas. Vamos fazer isso. Vou criar uma nova classe EmAprovacao que vai ficar em EstadosOrcamento. Vou criar uma nova pasta.
+
+[01:00] Esse EmAprovacao vai ter a regra de calcular um desconto extra, vou copiar isso, que vai ser o valor desse orçamento vezes 5%, então ele precisa receber orçamento, e a partir do orçamento ele calcula 5% do valor. Além disso, ele ainda pode aprovar esse orçamento, isso vai fazer com que o estado atual do orçamento seja aprovado.
+
+[01:52] Só que não temos essa instância aprovado, então vamos criar todos os estados possíveis e depois trabalhamos na transição entre os estados. Tenho Em Aprovação, Reprovado, Aprovado e Finalizado.
+
+[02:22] Agora que já temos todas as classes criadas, vamos criando as regras. O reprovado obviamente não pode receber um desconto extra, então vamos lançar uma exceção, e a mensagem fica até mais clara. Um orçamento reprovado não pode receber desconto.
+
+[02:52] Vou copiar isso. O orçamento finalizado também não pode. Agora, aprovado pode. Então, o cálculo de desconto para um orçamento aprovado é de 2%. Repare que aqui estou implementado a regra para cada um dos estados do orçamento. O calculaDescontoExtra vai ser diferente para cada um dos estados desse orçamento. Só que como o orçamento vai saber que isso é um estado? O que representa um estado? Vamos criar uma interface. Poderíamos até criar uma classe abstrata. Vamos fazer isso.
+
+[03:32] Vou criar uma nova classe EstadosOrcamento, e essa classe vai ser abstrata. Mas por que, Vinicius? Porque assim não preciso ficar implementando os métodos desnecessários. Vou implementar todos os métodos, calculaDescontoExtra. Na verdade, esse vou deixar todos implementarem. Todos os estados vão precisar implementar esse, vai ficar melhor, porque aí conseguimos dar aquela mensagem mais descritiva.
+
+[04:10] Vou informar com uma anotação no comentário que ele pode lançar uma domain exception para que quem for implementar essa interface saiba, quem for estender essa classe saiba que nesse método você pode lançar essa exceção.
+
+[04:25] Agora vou implementar o aprova, que vai lançar uma exceção este orçamento não pode ser aprovado. E vou fazer isso para todas as alterações de estado. Quando tentar reprovar a mesma coisa. Quando tentar finalizar a mesma coisa. Esse orçamento não pode ser reprovado e esse orçamento não pode ser finalizado.
+
+[05:00] Mas por que isso, Vinicius? Porque um orçamento em aprovação pode ser aprovado, pode ser reprovado, mas pode ser finalizado? Não. Então o finaliza já está implementado. Ou seja, só vou implementar o que faz sentido, que é o reprova, que vai fazer com que esse orçamento tenha como estado atual new reprovado.
+
+[05:30] Agora já temos essa classe completamente implementada, posso estender do estado orçamento. Eu esqueci de adicionar os parâmetros. O aprova precisa receber um orçamento, e todos eles também.
+
+[05:52] Tenho todas as regras implementadas. Um orçamento reprovado só precisa informar a mensagem do cálculo de desconto, também posso implementar o finalizado, está recebendo um orçamento, e posso mudar o estado. O estado atual dele pode ser finalizado. Isso é a mesma coisa em aprovado, também posso fazer isso.
+
+[06:26] Vinicius, você não poderia extrair esse método para alguma outra classe? Poderia, mas o você já está ficando comprido, então vou implementar assim por enquanto. Quando está aprovado pode finalizar, pode calcular o desconto extra. Agora, quanto está finalizado não pode fazer nada, não pode finalizar de novo, não pode aprovar nem reprovar, então já está implementado também, só vou estender do EstadosOrcamento.
+
+[06:53] Todos eles estão estendendo do EstadosOrcamento. Agora meu orçamento não vai ter mais uma string como estado atual, vai ter o estado do orçamento, que por padrão vai ser em aprovação.
+
+[07:12] Só que o que acontece? Não podemos fazer isso na criação. Posso criar um construtor para fazer isso, this estado atual por padrão é em aprovação. Por padrão todo orçamento vai estar em aprovação. Quando eu quiser aplicar um desconto extra ao invés de chamar o calculo desconto extra dele mesmo chamo o estado atual calculaDescontoExtra. Em que orçamento? Nele mesmo. Posso remover esse método que não é mais útil para nós.
+
+[07:50] E quando esse orçamento vai ser aprovado, reprovado? Como ele vai fazer isso? Vou criar todos aqueles métodos, que vai chamar this estadoAtual aprova esse orçamento. Vou fazer isso para todos aqueles três, para o reprova e para o finaliza. Pronto, está implementado. E todas as regras de cada um dos estados está na mão do próprio estado. Ou seja, meu orçamento não precisa ficar implementando if. Se estiver em andando aí você pode reprovar. Não. Os estados do orçamento já fazem todas essas regras. Inclusive o cálculo de desconto.
+
+[08:36] Falei bastante, implementei bastante código, então volto no próximo vídeo para falar sobre alguns problemas que isso pode gerar e o que acabamos fazendo na prática.
+
+@@05
+Desvantagens do State
+
+O padrão State é muito útil quando algum objeto pode ter diferentes comportamentos, dependendo do seu estado, mas assim como todos os padrões de projeto, existem prós e contras em implementar o State.
+Você consegue pensar em alguma desvantagem da sua aplicação?
+
+Dependendo do número de estados, um if pode ser mais simples, embora menos elegante
+ 
+Alternativa correta! Se nós possuímos apenas dois estados (e isso não pode crescer), pode acabar valendo mais a pena adicionar um if do que criar duas classes extras.
+Alternativa correta
+A aplicação do padrão faz com que exceções sejam lançadas, o que é ruim
+ 
+Alternativa correta
+Ao utilizar mais classes, perdemos performance
+
+@@06
+Princípio de Substituição de Liskov
+
+[00:00] Sejam bem-vindos de volta. Vamos falar sobre esse monte de classes que criamos, esse monte de código. O que acontece? Vamos pensar no mundo real. Se você pega seu celular e pressiona a tecla de bloquear, se esse celular estiver no estado bloqueado ele vai desbloquear, e se estiver desbloqueado ele vai bloquear. Ou seja, a mesma ação de apertar o botão de bloquear executa, gera resultados diferentes dependendo do estado do seu aparelho.
+[00:28] Nosso orçamento dependendo do estado dele, se eu executar a ação de aprovar, a ação vai ser diferente dependendo do estado. Se ele já estiver aprovado ele vai lançar um erro, dizendo que esse orçamento não pode ser aprovado. Então, dependendo do estado de algum objeto, ele pode executar ações diferentes para a mesma chamada de método.
+
+[00:50] No nosso caso, como estamos falando de orçamento, esse tipo de coisa, defini todos os estados como classes separadas, e para cada uma das classes implementei todas as ações possíveis. Isso é um padrão conhecido como state. Ou seja, estado. O nome é bem sugestivo.
+
+[01:10] Só que esse padrão pode gerar alguns problemas em alguns casos, como por exemplo no caso de tentarmos fazer qualquer coisa com orçamento finalizado. Acabamos tendo métodos que só lançam exceção. Às vezes, dependendo da implementação, já vi muita implementação definindo método vazio. Não nesse caso, mas como por exemplo da alteração de estado. Se você tentar finalizar um orçamento finalizado o método não faz nada.
+
+[01:33] Isso pode ser um problema, parece estranho, só que algumas pessoas dizem, é uma discussão bastante acalorada em alguns pontos da comunidade de desenvolvimento de software que fazendo isso, lançando uma exceção podemos acabar de violar o princípio de substituição de Liskov. Se você não conhece esse princípio, recomendo que você faça nosso curso de Solid na Alura, mas basicamente se você tem um orçamento qualquer e esse orçamento deveria aprovar o orçamento e devolver nada, por exemplo, ele deveria fazer isso independente da classe que estiver estendendo. Ele deve aprovar esse orçamento e não retornar nada.
+
+[02:20] Então, lançar uma exceção poderia ser uma quebra de contrato. Mas por isso fiz na minha classe base já informando que todos esses métodos podem lançar uma exceção, dessa forma colocamos no contrato dele dizendo que esse método lança exceção, então quem for chamar esse método tem que tratar isso, cuidar disso.
+
+[02:42] No orçamento poderíamos ainda colocar uma anotação também, informando que ele lança uma exceção, e assim todo mundo que chamar esse método já vai saber. Existem algumas formas de contornar esse problema de violar o contrato ou não. Mas basicamente esse é o padrão state. Temos um objeto de orçamento que representa um orçamento e dependendo do estado desse objeto as ações vão se comportar de forma diferente. A ação de aprovar pode mudar o estado dele para aprovado ou pode lançar uma exceção dependendo do estado.
+
+[03:25] Se aperto de novo o botão, se tenho um tocador de áudio e aperto o botão de play e ele estiver tocando, não vai fazer nada. Agora, se aperto o botão de play e estiver pausado vai dar o play. Se aperto o botão de pause e já está pausado, vai fazer alguma ação, provavelmente nada, talvez alguns players voltem para o início. Dependendo do estado do objeto a ação pode ser diferente, e para isso utilizamos o padrão state.
+
+[03:47] Agora temos a classe de orçamento com descontos, impostos. Vamos gerar um pedido formal a partir desse orçamento. Mas isso fica para o próximo capítulo.
+
+@@07
+Para saber mais: State
+
+Devido à natureza do PHP, de não se manter executando entre requisições HTTP, o padrão State não é tão utilizado, mas ainda pode ser implementado e bastante útil em alguns casos.
+Para que você entenda melhor como aplicar na vida real este padrão, é interessante conhecer toda sua parte teórica, como motivação, aplicações, etc.
+
+Para isso, você pode conferir este link: https://refactoring.guru/design-patterns/state.
+
+Já para entender melhor o que é o citado Padrão de Substituição de Liskov, você pode conferir o nosso curso de SOLID, aqui na Alura: https://cursos.alura.com.br/course/solid-php-principios-orientacao-a-objetos.
+
+@@08
+Faça como eu fiz
+
+Chegou a hora de você seguir todos os passos realizados por mim durante esta aula. Caso já tenha feito, excelente. Se ainda não, é importante que você execute o que foi visto nos vídeos para poder continuar com a próxima aula.
+
+Continue com os seus estudos, e se houver dúvidas, não hesite em recorrer ao nosso fórum!
+
+@@09
+O que aprendemos?
+
+Nesta aula, aprendemos:
+Que é possível que um objeto se comporte de formas diferentes, dependendo do seu estado
+Que, se o resultado de uma chamada de método depende do estado, podemos delegar esta ação para uma classe específica do estado atual
+Esta técnica se chama padrão State
+Entendemos como o Princípio de Substituição de Liskov pode acabar sendo quebrado em alguns casos na aplicação do State
+
+
 #### 15/02/2024
 
-@04-Command
+@05-Command
 
 @@01
 Projeto da aula anterior
@@ -732,7 +876,7 @@ Como ligar um evento ocorrido com suas ações, através do padrão Observer
 
 #### 20/02/2024
 
-07-Iterator
+@07-Iterator
 
 @@01
 Projeto da aula anterior
